@@ -1,0 +1,38 @@
+{
+  "name": "digital-companion-field-drug-testing",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "tsc --noEmit",
+    "test": "tsx scripts/verify-stage2.ts && tsx scripts/verify-stage3.ts && tsx scripts/verify-docking.ts && tsx scripts/verify-stage4.ts && tsx scripts/verify-stage5.ts && tsx scripts/verify-stage6.ts && tsx scripts/verify-stage7.ts && tsx scripts/verify-stage8.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.468.0",
+    "ngl": "^2.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "fake-indexeddb": "^6.2.5",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}
