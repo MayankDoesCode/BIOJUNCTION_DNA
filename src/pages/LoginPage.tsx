@@ -11,12 +11,18 @@ import {
   Bell,
   Layers,
   UserCheck,
+  UserPlus,
+  CheckCircle2,
+  Clock,
+  Shield,
 } from 'lucide-react';
 import { Badge } from '../components/common/Badge';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { authService, DEMO_STANDARD_PASSWORD } from '../services/authService';
 import type { User, UserRole } from '../types';
+import { BioJunctionLogo } from '../components/common/BioJunctionLogo';
+import { DnaSequencingBackground } from '../components/common/DnaSequencingBackground';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +37,24 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{ identifier?: string; password?: string }>({});
+
+  // Mode: LOGIN or SIGNUP
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
+
+  // Sign Up form state
+  const [signUpData, setSignUpData] = useState({
+    fullName: '',
+    username: '',
+    email: '',
+    agency: 'State Bureau of Forensic Operations',
+    badgeNumber: '',
+    role: 'FIELD_OFFICER' as UserRole,
+    password: '',
+    confirmPassword: '',
+  });
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState<string | null>(null);
+  const [signUpError, setSignUpError] = useState<string | null>(null);
 
   const demoUsers = authService.getAvailableDemoUsers();
 
@@ -80,6 +104,53 @@ export const LoginPage: React.FC = () => {
       setErrorMessage(err instanceof Error ? err.message : 'Unexpected terminal security error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignUpError(null);
+    setSignUpSuccess(null);
+
+    if (!signUpData.fullName.trim() || !signUpData.username.trim() || !signUpData.email.trim()) {
+      setSignUpError('Please fill in your full name, username, and official email.');
+      return;
+    }
+
+    if (!signUpData.password) {
+      setSignUpError('Please enter a secure password.');
+      return;
+    }
+
+    if (signUpData.password !== signUpData.confirmPassword) {
+      setSignUpError('Passwords do not match. Please verify both password entries.');
+      return;
+    }
+
+    try {
+      setIsSigningUp(true);
+      const res = await authService.register({
+        fullName: signUpData.fullName,
+        username: signUpData.username,
+        email: signUpData.email,
+        agency: signUpData.agency,
+        badgeNumber: signUpData.badgeNumber,
+        role: signUpData.role,
+        password: signUpData.password,
+      });
+
+      if (!res.success) {
+        setSignUpError(res.error || 'Failed to submit registration.');
+      } else {
+        setSignUpSuccess(
+          `Your access request has been submitted for ${signUpData.fullName} (@${signUpData.username}). Notice: Terminal security requires a System Administrator (Commander Reyes) to approve and activate your account before you can log in.`
+        );
+        showToast('Access request submitted for Admin review', 'success');
+      }
+    } catch (err) {
+      setSignUpError((err as Error).message);
+    } finally {
+      setIsSigningUp(false);
     }
   };
 
@@ -143,77 +214,75 @@ export const LoginPage: React.FC = () => {
   ];
 
   return (
-    <div className="relative min-h-screen text-slate-100 flex flex-col justify-between selection:bg-cyan-500 selection:text-navy-950 overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-luxury-cream text-luxury-maroon flex flex-col justify-between selection:bg-luxury-crimson selection:text-luxury-cream overflow-x-hidden font-sans">
       {/* 
-        Laboratory Photorealistic Background with dark holographic overlay
+        Live DNA Sequencing Background with soft warm ambient overlays
       */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
-        style={{ backgroundImage: `url('/images/auth-bg.jpg')` }}
-      />
-      {/* Vignette & Holographic Glow Overlays */}
-      <div className="fixed inset-0 bg-gradient-to-b from-navy-950/85 via-navy-950/75 to-navy-950/90 backdrop-blur-[2px] pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(6,182,212,0.18),transparent_65%)] pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_80%_60%,rgba(217,70,239,0.12),transparent_55%)] pointer-events-none" />
+      <DnaSequencingBackground intensity="subtle" />
+
+      {/* Warm Glow Overlays */}
+      <div className="fixed inset-0 bg-gradient-to-b from-[#f1f0cc]/70 via-[#f8f7ee]/60 to-[#f1f0cc]/80 backdrop-blur-[1px] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(213,191,134,0.18),transparent_65%)] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_80%_60%,rgba(167,29,49,0.10),transparent_55%)] pointer-events-none" />
 
       {/* Top Security Status Ribbon */}
-      <header className="relative z-10 bg-navy-950/80 backdrop-blur-md border-b border-cyan-500/20 px-4 sm:px-6 py-2.5 flex items-center justify-between text-xs">
+      <header className="relative z-10 bg-white/85 backdrop-blur-md border-b border-[#d5bf86]/40 px-4 sm:px-6 py-3 flex items-center justify-between text-xs shadow-xs">
         <div className="flex items-center gap-2.5">
           <Link
             to="/"
-            className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-200 transition-colors py-0.5 px-2 rounded-lg hover:bg-cyan-500/10 border border-cyan-500/20"
+            className="flex items-center gap-1.5 text-luxury-maroon hover:text-luxury-crimson transition-colors py-1 px-2.5 rounded-lg hover:bg-luxury-gold/20 border border-[#d5bf86]/40 font-bold"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="font-semibold text-xs tracking-wide">Back to Portal</span>
           </Link>
-          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-cyan-500/20 text-slate-300">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span className="font-medium text-xs">Forensic Field Access & Docking Platform</span>
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-[#d5bf86]/40 text-luxury-taupe font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span className="font-medium text-xs">Forensic Access & Molecular Docking Suite</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 font-mono text-[11px] text-cyan-300/80">
-          <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex items-center gap-3 font-mono text-[11px] text-luxury-taupe">
+          <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             SYSTEM ONLINE
           </span>
-          <span className="text-cyan-600">•</span>
-          <span>AES-256 VAULT</span>
-          <span className="text-cyan-600 hidden sm:inline">•</span>
+          <span className="text-luxury-gold">•</span>
+          <span className="font-bold text-luxury-maroon">AES-256 VAULT</span>
+          <span className="text-luxury-gold hidden sm:inline">•</span>
           <span className="hidden sm:inline">TERMINAL TER-4091A</span>
         </div>
       </header>
 
-      {/* Center Holographic HUD Screen Container */}
+      {/* Center Screen Container */}
       <main className="relative z-10 flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8">
-        <div className="w-full max-w-5xl rounded-[28px] sm:rounded-[36px] bg-[#040e1f]/75 backdrop-blur-2xl border border-cyan-400/40 shadow-[0_0_50px_rgba(6,182,212,0.22),0_20px_60px_-15px_rgba(0,0,0,0.85)] relative overflow-hidden transition-all duration-300 hover:border-cyan-300/60">
+        <div className="w-full max-w-5xl rounded-[28px] sm:rounded-[36px] bg-white/90 backdrop-blur-2xl border border-[#d5bf86]/50 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-[#d5bf86]/80">
           
-          {/* Subtle Glass HUD Inner Bevel Accent */}
-          <div className="absolute inset-0 rounded-[28px] sm:rounded-[36px] pointer-events-none border border-cyan-300/10" />
+          {/* Subtle Inner Bevel Accent */}
+          <div className="absolute inset-0 rounded-[28px] sm:rounded-[36px] pointer-events-none border border-white/80" />
 
           {/* Top HUD Frame Bar */}
-          <div className="px-6 py-3.5 border-b border-cyan-500/20 flex items-center justify-between bg-gradient-to-r from-cyan-950/30 via-slate-900/20 to-fuchsia-950/20">
-            {/* Top Left Navigation Link matching `< Login` in concept image */}
+          <div className="px-6 py-4 border-b border-[#d5bf86]/30 flex items-center justify-between bg-gradient-to-r from-[#fbfaf3] via-white to-[#f8f7ee]">
+            {/* Top Left Navigation Link */}
             <div className="flex items-center gap-2">
               <Link
                 to="/"
-                className="flex items-center gap-1 text-cyan-300 hover:text-cyan-100 font-mono text-xs tracking-wider transition-colors px-2 py-1 rounded hover:bg-cyan-500/10"
+                className="flex items-center gap-1 text-luxury-maroon hover:text-luxury-crimson font-mono text-xs font-bold tracking-wider transition-colors px-2 py-1 rounded hover:bg-luxury-gold/15"
               >
-                <ChevronLeft className="w-3.5 h-3.5 text-cyan-400" />
+                <ChevronLeft className="w-3.5 h-3.5 text-luxury-crimson" />
                 <span>&lt; Login</span>
               </Link>
-              <span className="text-cyan-500/40 text-xs hidden sm:inline">|</span>
-              <span className="text-[11px] font-mono tracking-widest text-cyan-400/70 uppercase hidden sm:inline">
-                Quantum Docking Subsystem
+              <span className="text-[#d5bf86] text-xs hidden sm:inline">|</span>
+              <span className="text-[11px] font-mono tracking-widest text-luxury-taupe uppercase font-semibold hidden sm:inline">
+                Molecular Docking Subsystem
               </span>
             </div>
 
-            {/* Top Right HUD Action Icons */}
-            <div className="flex items-center gap-3 text-cyan-400/80">
+            {/* Top Right Actions */}
+            <div className="flex items-center gap-3 text-luxury-taupe">
               <button
                 type="button"
                 onClick={() => showToast('HUD Diagnostic Log: All services operational', 'info')}
-                className="p-1.5 rounded-lg hover:bg-cyan-500/15 hover:text-cyan-200 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-luxury-gold/20 hover:text-luxury-maroon transition-colors"
                 title="Search Records"
               >
                 <Search className="w-4 h-4" />
@@ -221,13 +290,13 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => showToast('Zero active security alerts detected.', 'info')}
-                className="p-1.5 rounded-lg hover:bg-cyan-500/15 hover:text-cyan-200 transition-colors relative"
+                className="p-1.5 rounded-lg hover:bg-luxury-gold/20 hover:text-luxury-maroon transition-colors relative"
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-luxury-crimson animate-pulse" />
               </button>
-              <div className="w-7 h-7 rounded-full overflow-hidden border border-cyan-400/40 p-0.5">
+              <div className="w-7 h-7 rounded-full overflow-hidden border border-luxury-gold p-0.5">
                 <img
                   src="/images/dr-vance-avatar.jpg"
                   alt="Dr. E. Vance"
@@ -237,291 +306,414 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 2-Column Holographic Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-cyan-500/20">
+          {/* 2-Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-[#d5bf86]/30">
             
             {/* ========================================================================= */}
-            {/* LEFT COLUMN: Holographic Authentication Vault Form                         */}
+            {/* LEFT COLUMN: Authentication Vault Form                                      */}
             {/* ========================================================================= */}
-            <div className="lg:col-span-7 p-6 sm:p-8 md:p-10 flex flex-col justify-center relative">
+            <div className="lg:col-span-7 p-6 sm:p-8 md:p-10 flex flex-col justify-center relative bg-white/70">
               {/* Subtle background glow circle behind form */}
-              <div className="absolute top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-luxury-gold/20 rounded-full blur-3xl pointer-events-none" />
 
-              {/* Glowing Heart-Padlock & DNA Double-Helix Emblem */}
-              <div className="text-center relative z-10 mb-6">
-                <div className="relative inline-flex items-center justify-center mb-3">
-                  {/* Custom Neon Heart-Lock + DNA SVG */}
-                  <svg
-                    viewBox="0 0 160 140"
-                    className="w-24 h-24 sm:w-28 sm:h-28 mx-auto drop-shadow-[0_0_20px_rgba(6,182,212,0.6)] filter"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3.5" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                      </filter>
-                      <linearGradient id="neon-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#67e8f9" />
-                        <stop offset="50%" stopColor="#22d3ee" />
-                        <stop offset="100%" stopColor="#0891b2" />
-                      </linearGradient>
-                      <linearGradient id="neon-pink" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#f472b6" />
-                        <stop offset="50%" stopColor="#ec4899" />
-                        <stop offset="100%" stopColor="#a855f7" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Ambient Glow */}
-                    <circle cx="80" cy="70" r="42" fill="#06b6d4" opacity="0.12" filter="url(#neon-glow)" />
-
-                    {/* DNA Helix Strands Wrapping Around the Lock (Left Strand Cyan) */}
-                    <path
-                      d="M 28 42 C 40 48, 55 75, 45 98 C 38 114, 25 125, 42 135"
-                      stroke="url(#neon-cyan)"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      filter="url(#neon-glow)"
-                    />
-                    {/* DNA Helix Strands (Right Strand Pink/Magenta) */}
-                    <path
-                      d="M 132 42 C 120 48, 105 75, 115 98 C 122 114, 135 125, 118 135"
-                      stroke="url(#neon-pink)"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      filter="url(#neon-glow)"
-                    />
-
-                    {/* Base Pairs Connecting Strands */}
-                    <line x1="33" y1="46" x2="48" y2="52" stroke="#22d3ee" strokeWidth="2" strokeDasharray="2 2" />
-                    <line x1="127" y1="46" x2="112" y2="52" stroke="#ec4899" strokeWidth="2" strokeDasharray="2 2" />
-                    <line x1="44" y1="76" x2="56" y2="78" stroke="#22d3ee" strokeWidth="2" strokeDasharray="2 2" />
-                    <line x1="116" y1="76" x2="104" y2="78" stroke="#ec4899" strokeWidth="2" strokeDasharray="2 2" />
-                    <line x1="42" y1="102" x2="58" y2="100" stroke="#22d3ee" strokeWidth="2" strokeDasharray="2 2" />
-                    <line x1="118" y1="102" x2="102" y2="100" stroke="#ec4899" strokeWidth="2" strokeDasharray="2 2" />
-
-                    {/* Heart-Shaped Padlock Shackle */}
-                    <path
-                      d="M 64 56 V 42 C 64 33, 71 26, 80 26 C 89 26, 96 33, 96 42 V 56"
-                      stroke="url(#neon-cyan)"
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      filter="url(#neon-glow)"
-                    />
-
-                    {/* Heart-Shaped Padlock Body */}
-                    <path
-                      d="M 80 114 C 44 92, 48 60, 68 56 C 76 54, 80 60, 80 60 C 80 60, 84 54, 92 56 C 112 60, 116 92, 80 114 Z"
-                      fill="#031124"
-                      stroke="url(#neon-cyan)"
-                      strokeWidth="4"
-                      filter="url(#neon-glow)"
-                    />
-
-                    {/* Keyhole inside Heart */}
-                    <circle cx="80" cy="78" r="5" fill="#e0f2fe" filter="url(#neon-glow)" />
-                    <polygon points="77,80 83,80 84,92 76,92" fill="#e0f2fe" filter="url(#neon-glow)" />
-
-                    {/* Holographic Sparkles */}
-                    <circle cx="68" cy="38" r="1.5" fill="#ffffff" />
-                    <circle cx="95" cy="48" r="1.5" fill="#fbcfe8" />
-                    <circle cx="58" cy="94" r="1.5" fill="#67e8f9" />
-                    <circle cx="102" cy="94" r="1.5" fill="#f472b6" />
-                  </svg>
-                </div>
-
-                {/* Title matching concept image */}
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-100 via-white to-cyan-200">
-                  BIO-SYNTHESIS
-                </h1>
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.35em] uppercase text-cyan-400 pt-0.5">
-                  ANALYTICS
+              {/* BioJunction Biological Logo Emblem */}
+              <div className="text-center relative z-10 mb-4 flex flex-col items-center">
+                <BioJunctionLogo size="lg" variant="light" className="mb-2" />
+                <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-luxury-taupe pt-1">
+                  SECURE RESEARCH ACCESS
                 </p>
               </div>
 
-              {/* Authentication Form */}
-              <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto w-full relative z-10">
-                {/* Error Banner */}
-                {errorMessage && (
-                  <div className="p-3 bg-rose-950/70 border border-rose-500/50 rounded-2xl flex items-start gap-2.5 text-xs text-rose-200 animate-in fade-in duration-150 shadow-[0_0_15px_rgba(244,63,94,0.3)]">
-                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                    <div className="leading-relaxed">
-                      <span className="font-bold block text-rose-300">Authentication Failed</span>
-                      {errorMessage}
-                    </div>
-                  </div>
-                )}
+              {/* Tab Switcher: Login vs Request Access */}
+              <div className="flex bg-[#f1f0cc]/80 p-1 rounded-full border border-[#d5bf86]/50 max-w-xs mx-auto mb-5 relative z-10 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('LOGIN');
+                    setErrorMessage(null);
+                    setSignUpError(null);
+                  }}
+                  className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all ${
+                    authMode === 'LOGIN'
+                      ? 'bg-luxury-maroon text-white shadow-xs'
+                      : 'text-luxury-taupe hover:text-luxury-maroon'
+                  }`}
+                >
+                  Terminal Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('SIGNUP');
+                    setErrorMessage(null);
+                    setSignUpError(null);
+                  }}
+                  className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all ${
+                    authMode === 'SIGNUP'
+                      ? 'bg-luxury-maroon text-white shadow-xs'
+                      : 'text-luxury-taupe hover:text-luxury-maroon'
+                  }`}
+                >
+                  Request Access
+                </button>
+              </div>
 
-                {/* Username or Email Input */}
-                <div className="space-y-1">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={identifier}
-                      onChange={(e) => {
-                        setIdentifier(e.target.value);
-                        if (validationErrors.identifier) {
-                          setValidationErrors((prev) => ({ ...prev, identifier: undefined }));
-                        }
-                      }}
-                      placeholder="Username or Email"
-                      autoComplete="username"
-                      className={`w-full px-5 py-3.5 rounded-full bg-[#030d1d]/80 border text-sm text-cyan-50 placeholder-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/40 transition-all ${
-                        validationErrors.identifier
-                          ? 'border-rose-400 ring-1 ring-rose-400'
-                          : 'border-cyan-500/40 hover:border-cyan-400/70 focus:border-cyan-300'
-                      }`}
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-cyan-400/60">
-                      <UserIcon className="w-4 h-4" />
+              {authMode === 'LOGIN' ? (
+                /* ======================== LOGIN FORM ======================== */
+                <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto w-full relative z-10">
+                  {/* Error Banner */}
+                  {errorMessage && (
+                    <div className="p-3 bg-rose-950/70 border border-rose-500/50 rounded-2xl flex items-start gap-2.5 text-xs text-rose-200 animate-in fade-in duration-150 shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <div className="leading-relaxed">
+                        <span className="font-bold block text-rose-300">Authentication Alert</span>
+                        {errorMessage}
+                      </div>
                     </div>
-                  </div>
-                  {validationErrors.identifier && (
-                    <span className="text-[11px] text-rose-400 pl-4 block">
-                      {validationErrors.identifier}
-                    </span>
                   )}
-                </div>
 
-                {/* Password Input */}
-                <div className="space-y-1">
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (validationErrors.password) {
-                          setValidationErrors((prev) => ({ ...prev, password: undefined }));
-                        }
-                      }}
-                      placeholder="Password"
-                      autoComplete="current-password"
-                      className={`w-full px-5 py-3.5 pr-12 rounded-full bg-[#030d1d]/80 border text-sm text-cyan-50 placeholder-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/40 transition-all ${
-                        validationErrors.password
-                          ? 'border-rose-400 ring-1 ring-rose-400'
-                          : 'border-cyan-500/40 hover:border-cyan-400/70 focus:border-cyan-300'
-                      }`}
-                    />
+                  {/* Username or Email Input */}
+                  <div className="space-y-1">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={identifier}
+                        onChange={(e) => {
+                          setIdentifier(e.target.value);
+                          if (validationErrors.identifier) {
+                            setValidationErrors((prev) => ({ ...prev, identifier: undefined }));
+                          }
+                        }}
+                        placeholder="Username or Email"
+                        autoComplete="username"
+                        className={`w-full px-5 py-3.5 rounded-full bg-white/90 border text-sm text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson/40 transition-all shadow-xs ${
+                          validationErrors.identifier
+                            ? 'border-rose-500 ring-1 ring-rose-400'
+                            : 'border-[#d5bf86]/60 hover:border-luxury-crimson focus:border-luxury-crimson'
+                        }`}
+                      />
+                      <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-luxury-taupe">
+                        <UserIcon className="w-4 h-4" />
+                      </div>
+                    </div>
+                    {validationErrors.identifier && (
+                      <span className="text-[11px] text-rose-600 pl-4 block font-medium">
+                        {validationErrors.identifier}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="space-y-1">
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          if (validationErrors.password) {
+                            setValidationErrors((prev) => ({ ...prev, password: undefined }));
+                          }
+                        }}
+                        placeholder="Password"
+                        autoComplete="current-password"
+                        className={`w-full px-5 py-3.5 pr-12 rounded-full bg-white/90 border text-sm text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson/40 transition-all shadow-xs ${
+                          validationErrors.password
+                            ? 'border-rose-500 ring-1 ring-rose-400'
+                            : 'border-[#d5bf86]/60 hover:border-luxury-crimson focus:border-luxury-crimson'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-luxury-taupe hover:text-luxury-maroon focus:outline-none"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {validationErrors.password && (
+                      <span className="text-[11px] text-rose-600 pl-4 block font-medium">
+                        {validationErrors.password}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Remember Session Toggle */}
+                  <div className="flex items-center justify-between px-2 pt-0.5">
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-luxury-taupe hover:text-luxury-maroon font-semibold">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-[#d5bf86] text-luxury-crimson focus:ring-luxury-crimson"
+                      />
+                      <span>Remember this device</span>
+                    </label>
+                  </div>
+
+                  {/* Big Luxury Gradient Login Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 px-6 rounded-full font-bold text-luxury-cream text-base tracking-wide bg-gradient-to-r from-luxury-maroon via-luxury-crimson to-luxury-maroon hover:opacity-95 shadow-xl shadow-luxury-maroon/25 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Authenticating Vault...</span>
+                      </>
+                    ) : (
+                      <span>Login</span>
+                    )}
+                  </button>
+
+                  {/* Sub-action Links */}
+                  <div className="flex items-center justify-between text-xs px-3 pt-2 text-luxury-taupe font-semibold">
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-cyan-400/70 hover:text-cyan-200 focus:outline-none"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onClick={() =>
+                        showToast(
+                          'Demo Environment Hint: Select any authorized operator profile on the right panel or use "FieldTesting2026!".',
+                          'info',
+                          'Password Recovery'
+                        )
+                      }
+                      className="hover:text-luxury-crimson transition-colors underline-offset-4 hover:underline"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      Forgot Password?
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode('SIGNUP')}
+                      className="hover:text-luxury-crimson text-luxury-maroon font-bold transition-colors underline-offset-4 hover:underline flex items-center gap-1"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Request New Access
                     </button>
                   </div>
-                  {validationErrors.password && (
-                    <span className="text-[11px] text-rose-400 pl-4 block">
-                      {validationErrors.password}
-                    </span>
-                  )}
-                </div>
+                </form>
+              ) : (
+                /* ======================== SIGN UP / ACCESS REQUEST FORM ======================== */
+                <div className="max-w-md mx-auto w-full relative z-10 space-y-4">
+                  {signUpSuccess ? (
+                    <div className="p-6 bg-emerald-50/90 border border-emerald-300 rounded-3xl text-center space-y-4 shadow-sm animate-fade-in">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+                        <CheckCircle2 className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base text-emerald-950 mb-1">
+                          Access Request Submitted!
+                        </h4>
+                        <p className="text-xs text-emerald-800 leading-relaxed">
+                          {signUpSuccess}
+                        </p>
+                      </div>
 
-                {/* Remember Session Toggle */}
-                <div className="flex items-center justify-between px-2 pt-0.5">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-cyan-300/80 hover:text-cyan-200">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded border-cyan-500/40 bg-navy-950 text-cyan-500 focus:ring-cyan-400"
-                    />
-                    <span>Remember this device</span>
-                  </label>
-                </div>
+                      <div className="p-3 rounded-2xl bg-white/80 border border-emerald-200 text-[11px] text-emerald-900 text-left space-y-1">
+                        <div className="font-bold flex items-center gap-1.5">
+                          <Shield className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>Admin Approval Workflow</span>
+                        </div>
+                        <p className="text-emerald-800">
+                          To simulate approval right now, log in as <strong>Commander Reyes (Admin)</strong> and open <strong>User Management</strong> in the sidebar to click <em>"Approve & Grant Access"</em>.
+                        </p>
+                      </div>
 
-                {/* Big Neon Gradient Login Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 px-6 rounded-full font-bold text-white text-base tracking-wide bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 hover:from-cyan-300 hover:via-sky-300 hover:to-pink-500 shadow-[0_0_30px_rgba(6,182,212,0.55)] hover:shadow-[0_0_40px_rgba(217,70,239,0.7)] transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Authenticating Vault...</span>
-                    </>
+                      <div className="flex flex-col gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAuthMode('LOGIN');
+                            setSignUpSuccess(null);
+                          }}
+                          className="w-full py-2.5 px-4 rounded-full bg-luxury-maroon hover:bg-luxury-crimson text-white font-bold text-xs shadow-md transition-all"
+                        >
+                          Return to Terminal Login
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Quick fill admin
+                            const adminUser = demoUsers.find((u) => u.role === 'ADMIN');
+                            if (adminUser) handleSelectDemoUser(adminUser);
+                            setAuthMode('LOGIN');
+                            setSignUpSuccess(null);
+                          }}
+                          className="text-xs text-luxury-crimson font-bold hover:underline"
+                        >
+                          Log in as Admin (Commander Reyes) to approve
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <span>Login</span>
-                  )}
-                </button>
+                    <form onSubmit={handleSignUp} className="space-y-3">
+                      {signUpError && (
+                        <div className="p-3 bg-rose-950/70 border border-rose-500/50 rounded-2xl flex items-start gap-2.5 text-xs text-rose-200 animate-in fade-in duration-150 shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+                          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                          <div className="leading-relaxed">
+                            <span className="font-bold block text-rose-300">Registration Error</span>
+                            {signUpError}
+                          </div>
+                        </div>
+                      )}
 
-                {/* Sub-action Links matching the concept image */}
-                <div className="flex items-center justify-between text-xs px-3 pt-2 text-cyan-400/80">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      showToast(
-                        'Demo Environment Hint: Select any authorized operator profile on the right panel or use "FieldTesting2026!".',
-                        'info',
-                        'Password Recovery'
-                      )
-                    }
-                    className="hover:text-cyan-200 transition-colors underline-offset-4 hover:underline"
-                  >
-                    Forgot Password?
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      showToast(
-                        'Access Request: New credential issuances are authorized via agency cryptographic keys.',
-                        'info',
-                        'Operator Provisioning'
-                      )
-                    }
-                    className="hover:text-cyan-200 transition-colors underline-offset-4 hover:underline"
-                  >
-                    Request Access
-                  </button>
+                      {/* Admin Approval Notice Banner */}
+                      <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2">
+                        <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed">
+                          <strong>Admin Approval Required:</strong> All newly submitted registrations remain locked until reviewed and approved by an Administrator.
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <input
+                          type="text"
+                          required
+                          placeholder="Full Name *"
+                          value={signUpData.fullName}
+                          onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        />
+                        <input
+                          type="text"
+                          required
+                          placeholder="Username *"
+                          value={signUpData.username}
+                          onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        />
+                      </div>
+
+                      <input
+                        type="email"
+                        required
+                        placeholder="Official Agency Email *"
+                        value={signUpData.email}
+                        onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                      />
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <input
+                          type="text"
+                          placeholder="Badge / Personnel ID"
+                          value={signUpData.badgeNumber}
+                          onChange={(e) => setSignUpData({ ...signUpData, badgeNumber: e.target.value })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        />
+                        <select
+                          value={signUpData.role}
+                          onChange={(e) => setSignUpData({ ...signUpData, role: e.target.value as UserRole })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs font-bold text-luxury-maroon focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        >
+                          <option value="FIELD_OFFICER">Role: Field Officer</option>
+                          <option value="LAB_USER">Role: Lab Specialist</option>
+                          <option value="SUPERVISOR">Role: Supervisor</option>
+                          <option value="VIEWER">Role: Read-Only Viewer</option>
+                        </select>
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="Agency / Department Name"
+                        value={signUpData.agency}
+                        onChange={(e) => setSignUpData({ ...signUpData, agency: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                      />
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <input
+                          type="password"
+                          required
+                          placeholder="Password *"
+                          value={signUpData.password}
+                          onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        />
+                        <input
+                          type="password"
+                          required
+                          placeholder="Confirm Password *"
+                          value={signUpData.confirmPassword}
+                          onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
+                          className="w-full px-4 py-2.5 rounded-full bg-white/90 border border-[#d5bf86]/60 text-xs text-luxury-maroon placeholder:text-luxury-taupe/60 focus:outline-none focus:ring-2 focus:ring-luxury-crimson"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSigningUp}
+                        className="w-full py-3.5 px-6 rounded-full font-bold text-luxury-cream text-sm tracking-wide bg-gradient-to-r from-luxury-maroon via-luxury-crimson to-luxury-maroon hover:opacity-95 shadow-xl shadow-luxury-maroon/25 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                      >
+                        {isSigningUp ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Submitting Access Request...</span>
+                          </>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4" />
+                            Submit Access Request to Admin
+                          </span>
+                        )}
+                      </button>
+
+                      <div className="text-center pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setAuthMode('LOGIN')}
+                          className="text-xs text-luxury-taupe hover:text-luxury-maroon font-semibold"
+                        >
+                          Already have an authorized profile? <span className="text-luxury-crimson font-bold underline">Login here</span>
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
-              </form>
+              )}
             </div>
 
             {/* ========================================================================= */}
             {/* RIGHT COLUMN: Verified Activity Records & Dr. Vance Operator Profile      */}
             {/* ========================================================================= */}
-            <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-b from-[#030b17]/50 to-[#02070f]/80">
+            <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-b from-[#fbfaf3] to-[#f8f7ee]">
               
               {/* Top Section: Recent Verified Docking Runs / Case Feed */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[11px] font-mono uppercase tracking-widest text-cyan-300 font-semibold">
+                    <Layers className="w-3.5 h-3.5 text-luxury-crimson" />
+                    <span className="text-[11px] font-mono uppercase tracking-widest text-luxury-maroon font-bold">
                       Docking Telemetry Feed
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-cyan-500/70">LIVE SYNC</span>
+                  <span className="text-[10px] font-mono text-luxury-taupe font-bold">LIVE SYNC</span>
                 </div>
 
-                {/* List items matching concept image */}
+                {/* List items */}
                 <div className="space-y-2">
                   {recentActivities.map((act, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-2xl bg-cyan-950/20 hover:bg-cyan-900/30 border border-cyan-500/20 hover:border-cyan-400/40 transition-all duration-200 flex items-center justify-between group cursor-default"
+                      className="p-3 rounded-2xl bg-white/90 hover:bg-white border border-[#d5bf86]/40 hover:border-luxury-crimson/50 transition-all duration-200 flex items-center justify-between group cursor-default shadow-xs"
                     >
                       <div className="min-w-0 pr-2">
-                        <div className="font-semibold text-xs text-cyan-100 group-hover:text-cyan-50 truncate flex items-center gap-1.5">
+                        <div className="font-bold text-xs text-luxury-maroon truncate flex items-center gap-1.5">
                           <span>{act.title}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-luxury-gold/25 text-luxury-maroon border border-luxury-gold/50">
                             {act.pdbId}
                           </span>
                         </div>
-                        <div className="text-[10px] text-cyan-400/70 truncate pt-0.5">
+                        <div className="text-[10px] text-luxury-taupe font-medium truncate pt-0.5">
                           {act.target}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-[10px] font-mono text-cyan-400/90 font-medium">
+                        <div className="text-[10px] font-mono text-luxury-taupe font-bold">
                           {act.date}
                         </div>
-                        <div className="text-[10px] font-mono text-emerald-400 pt-0.5">
+                        <div className="text-[10px] font-mono text-emerald-700 font-bold pt-0.5">
                           {act.affinity}
                         </div>
                       </div>
@@ -530,14 +722,14 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Bottom Section: Operator Profile (Dr. E. Vance) matching image */}
-              <div className="mt-6 pt-5 border-t border-cyan-500/20">
+              {/* Bottom Section: Operator Profile (Dr. E. Vance) */}
+              <div className="mt-6 pt-5 border-t border-[#d5bf86]/30">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/80">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-luxury-taupe">
                     Active Station Operator
                   </span>
-                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] font-mono text-emerald-700 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Terminal Ready
                   </span>
                 </div>
@@ -545,7 +737,7 @@ export const LoginPage: React.FC = () => {
                 {/* Featured Doctor Profile Card */}
                 <div 
                   onClick={() => handleSelectDemoUser(drVanceUser)}
-                  className="p-3 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-navy-900/40 to-fuchsia-950/30 border border-cyan-400/40 hover:border-cyan-300 p-3 flex items-center justify-between cursor-pointer group shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]"
+                  className="p-3.5 rounded-2xl bg-white border border-luxury-gold hover:border-luxury-crimson flex items-center justify-between cursor-pointer group shadow-sm transition-all hover:shadow-md"
                   title="Click to load Dr. Vance credentials"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -553,21 +745,21 @@ export const LoginPage: React.FC = () => {
                       <img
                         src="/images/dr-vance-avatar.jpg"
                         alt="Dr. E. Vance"
-                        className="w-11 h-11 rounded-full object-cover border-2 border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)] group-hover:border-cyan-300 transition-all"
+                        className="w-11 h-11 rounded-full object-cover border-2 border-luxury-gold shadow-xs group-hover:border-luxury-crimson transition-all"
                       />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-navy-950 rounded-full" />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-xs text-white group-hover:text-cyan-200 transition-colors flex items-center gap-1.5">
+                      <div className="font-bold text-xs text-luxury-maroon group-hover:text-luxury-crimson transition-colors flex items-center gap-1.5">
                         <span>Dr. E. Vance</span>
                         <Badge variant={getRoleBadgeVariant(drVanceUser.role)} size="sm">
                           {drVanceUser.role}
                         </Badge>
                       </div>
-                      <div className="text-[10px] text-cyan-400/80 font-mono truncate">
+                      <div className="text-[10px] text-luxury-taupe font-mono truncate">
                         Special Investigations Taskforce
                       </div>
-                      <div className="text-[10px] text-cyan-500/70 font-mono pt-0.5">
+                      <div className="text-[10px] text-luxury-crimson font-mono pt-0.5 font-bold">
                         Badge: {drVanceUser.badgeNumber} • @{drVanceUser.username}
                       </div>
                     </div>
@@ -576,9 +768,9 @@ export const LoginPage: React.FC = () => {
                   <div className="shrink-0 pl-2">
                     <button
                       type="button"
-                      className="px-2.5 py-1.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-200 text-[10px] font-bold border border-cyan-400/40 group-hover:border-cyan-300 transition-all flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-full bg-luxury-gold/30 hover:bg-luxury-crimson hover:text-luxury-cream text-luxury-maroon text-[10px] font-bold border border-luxury-gold/60 transition-all flex items-center gap-1 shadow-xs"
                     >
-                      <UserCheck className="w-3 h-3 text-cyan-300" />
+                      <UserCheck className="w-3 h-3 text-luxury-crimson group-hover:text-luxury-cream" />
                       <span>Autofill</span>
                     </button>
                   </div>
@@ -586,9 +778,9 @@ export const LoginPage: React.FC = () => {
 
                 {/* Other Pre-Configured Demo Profiles Quick Switcher */}
                 <div className="mt-3">
-                  <div className="flex items-center justify-between text-[10px] text-cyan-400/70 font-mono mb-1.5">
+                  <div className="flex items-center justify-between text-[10px] text-luxury-taupe font-mono mb-1.5 font-medium">
                     <span>Other Demo Profiles:</span>
-                    <span>Standard Demo Password: FieldTesting2026!</span>
+                    <span>Demo Password: FieldTesting2026!</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5">
                     {demoUsers
@@ -599,12 +791,12 @@ export const LoginPage: React.FC = () => {
                           key={u.id}
                           type="button"
                           onClick={() => handleSelectDemoUser(u)}
-                          className="px-2 py-1.5 rounded-xl bg-navy-950/70 hover:bg-cyan-950/60 border border-cyan-500/20 hover:border-cyan-400/50 text-left transition-all group"
+                          className="px-2 py-1.5 rounded-xl bg-white/80 hover:bg-white border border-[#d5bf86]/40 hover:border-luxury-crimson text-left transition-all group shadow-xs"
                         >
-                          <div className="font-semibold text-[10px] text-cyan-200 group-hover:text-white truncate">
+                          <div className="font-bold text-[10px] text-luxury-maroon group-hover:text-luxury-crimson truncate">
                             {u.fullName.split(' ')[1] || u.fullName}
                           </div>
-                          <div className="text-[9px] text-cyan-400/60 uppercase truncate">
+                          <div className="text-[9px] text-luxury-taupe uppercase truncate font-semibold">
                             {u.role.replace('_', ' ')}
                           </div>
                         </button>
@@ -619,10 +811,10 @@ export const LoginPage: React.FC = () => {
       </main>
 
       {/* Bottom Compliance & Legal Footer */}
-      <footer className="relative z-10 bg-navy-950/90 border-t border-cyan-500/20 px-4 py-2.5 text-center text-[11px] text-cyan-400/70 font-mono">
+      <footer className="relative z-10 bg-white/80 backdrop-blur-md border-t border-[#d5bf86]/40 px-4 py-3 text-center text-[11px] text-luxury-taupe font-medium">
         <p>
-          Strictly authorized for forensic drug verification and molecular docking validation.
-          All telemetric transactions and pose evaluations are logged securely under protocol RFC-2026.
+          Strictly authorized for molecular docking validation and in silico simulation.
+          All telemetric transactions and pose evaluations are logged securely under BIOJUNCTION protocol RFC-2026.
         </p>
       </footer>
     </div>

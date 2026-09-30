@@ -33,6 +33,8 @@ export interface User {
   email: string;
   active: boolean;
   createdAt: string;
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  password?: string;
 }
 
 export interface AuthSession {

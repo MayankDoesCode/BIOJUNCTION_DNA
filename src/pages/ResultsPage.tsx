@@ -13,6 +13,7 @@ import {
   Dna,
   Pill,
   Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/common/Card';
@@ -24,10 +25,11 @@ import { MolecularViewer } from '../components/molecular/MolecularViewer';
 import { InteractionAnalysisPanel } from '../components/molecular/InteractionAnalysisPanel';
 import { dockingRepository } from '../database/repositories/dockingRepository';
 import { proteinRepository } from '../database/repositories/proteinRepository';
+import { ligandRepository } from '../database/repositories/ligandRepository';
 import { dockingService, type DockingEngineStatus } from '../services/dockingService';
 import { interactionAnalysisService } from '../services/interactionAnalysisService';
 import { formatShortDate } from '../utils/formatters';
-import type { DockingResult, DockingJob, Protein } from '../types';
+import type { DockingResult, DockingJob, Protein, Ligand } from '../types';
 
 export const ResultsPage: React.FC = () => {
   const { jobId } = useParams<{ jobId?: string }>();
@@ -38,6 +40,7 @@ export const ResultsPage: React.FC = () => {
   const [selectedResult, setSelectedResult] = useState<DockingResult | null>(null);
   const [selectedJob, setSelectedJob] = useState<DockingJob | null>(null);
   const [proteinRecord, setProteinRecord] = useState<Protein | null>(null);
+  const [ligandRecord, setLigandRecord] = useState<Ligand | null>(null);
   const [engineStatus, setEngineStatus] = useState<DockingEngineStatus | null>(null);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +101,15 @@ export const ResultsPage: React.FC = () => {
             setProteinRecord(p || null);
           }
         }
+
+        // Fetch ligand structure if available
+        if (currentR?.ligandId || currentJ?.ligandId) {
+          const lId = currentR?.ligandId || currentJ?.ligandId;
+          if (lId) {
+            const l = await ligandRepository.getById(lId);
+            setLigandRecord(l || null);
+          }
+        }
       } catch (err) {
         console.error('Failed to load docking results and jobs', err);
       } finally {
@@ -118,6 +130,10 @@ export const ResultsPage: React.FC = () => {
     if (j.proteinId) {
       const p = await proteinRepository.getById(j.proteinId);
       setProteinRecord(p || null);
+    }
+    if (j.ligandId) {
+      const l = await ligandRepository.getById(j.ligandId);
+      setLigandRecord(l || null);
     }
     navigate(`/results/${j.jobId}`);
   };
@@ -209,19 +225,36 @@ export const ResultsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Mandatory Scientific Limitation Notice (Requirement 9) */}
-        <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-900 flex items-start gap-2.5">
-          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        {/* Mandatory Scientific Limitation Notice (Requirement 9 & Section 15) */}
+        <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-200 flex items-start gap-2.5">
+          <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
-            <span className="font-bold text-amber-950 block text-xs">
-              Scientific Limitation Notice
+            <span className="font-bold text-amber-100 block text-xs">
+              Scientific Disclaimer
             </span>
-            Docking results are computational predictions and do not establish clinical effectiveness, safety, or a cure.
+            Docking results are computational predictions and do not establish clinical efficacy, therapeutic effectiveness, or experimental binding.
           </div>
         </div>
 
-        {/* Engine Standby Notice (Requirement 2) */}
-        {(!engineStatus || !engineStatus.isAvailable) && (
+        {/* Engine Status Notice Banner */}
+        {engineStatus?.isAvailable ? (
+          <div className="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-xs text-emerald-200 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div>
+                <span className="font-bold text-white text-sm block">
+                  AutoDock Vina v{engineStatus.version || '1.2.7'} — Engine Available
+                </span>
+                <span className="text-[11px] text-emerald-300/80">
+                  Host executable verified via server environment probe.
+                </span>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-slate-900 text-cyan-300 border border-emerald-500/40">
+              Host Process Connected
+            </span>
+          </div>
+        ) : (
           <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -350,10 +383,11 @@ export const ResultsPage: React.FC = () => {
 
             <MolecularViewer
               proteinName={proteinName}
+              structureId={proteinRecord?.structureId}
               proteinData={proteinRecord?.fileData}
               proteinFormat={proteinRecord?.fileFormat}
               ligandName={ligandName}
-              ligandData={currentPose?.modelCoordinates}
+              ligandData={currentPose?.modelCoordinates || ligandRecord?.fileData}
               selectedPoseMode={currentPose?.mode}
               bindingSite={bindingSite}
               hasCompletedDocking={selectedResult?.hasRealResult ?? false}

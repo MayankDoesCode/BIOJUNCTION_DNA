@@ -5,24 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "node scripts/prepare-vina.js && tsc && vite build",
     "lint": "tsc --noEmit",
-    "test": "tsx scripts/verify-stage2.ts && tsx scripts/verify-stage3.ts && tsx scripts/verify-docking.ts && tsx scripts/verify-stage4.ts && tsx scripts/verify-stage5.ts && tsx scripts/verify-stage6.ts && tsx scripts/verify-stage7.ts && tsx scripts/verify-stage8.ts",
+    "test": "tsx scripts/verify-stage2.ts && tsx scripts/verify-stage3.ts && tsx scripts/verify-docking.ts && tsx scripts/verify-stage4.ts && tsx scripts/verify-stage5.ts && tsx scripts/verify-stage6.ts && tsx scripts/verify-stage7.ts && tsx scripts/verify-stage8.ts && tsx scripts/verify-user-approval.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/three": "^0.186.0",
     "clsx": "^2.1.1",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
+    "framer-motion": "^13.4.6",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.468.0",
     "ngl": "^2.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
+    "@netlify/functions": "^6.0.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

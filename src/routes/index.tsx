@@ -21,6 +21,8 @@ import { DockingPage } from '../pages/DockingPage';
 import { ResultsPage } from '../pages/ResultsPage';
 import { ComparisonPage } from '../pages/ComparisonPage';
 import { PrototypePage } from '../pages/PrototypePage';
+import { DatasetManagerPage } from '../pages/DatasetManagerPage';
+import { UserManagementPage } from '../pages/UserManagementPage';
 import { UnauthorizedPage } from '../pages/UnauthorizedPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { LandingPage } from '../pages/LandingPage';
@@ -142,6 +144,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: '/users',
+        element: (
+          <ProtectedRoute requiredPermission="SETTINGS_MANAGE">
+            <UserManagementPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '/proteins',
         element: <ProteinsPage />,
       },
@@ -176,6 +186,10 @@ export const router = createBrowserRouter([
       {
         path: '/prototype',
         element: <PrototypePage />,
+      },
+      {
+        path: '/datasets',
+        element: <DatasetManagerPage />,
       },
       {
         path: '/unauthorized',

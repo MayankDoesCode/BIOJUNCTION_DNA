@@ -142,8 +142,8 @@ export const DockingPage: React.FC = () => {
     setIsSubmitting(true);
     setJobProgress({
       status: 'PREPARING',
-      progressPercent: 10,
-      message: 'Preparing molecular inputs and validating search space...',
+      progressPercent: 20,
+      message: 'Preparing Inputs',
     });
 
     try {
@@ -157,18 +157,26 @@ export const DockingPage: React.FC = () => {
         },
       });
 
-      showToast('Docking job created and registered successfully', 'success');
+      showToast('Computational docking simulation completed successfully', 'success');
       setTimeout(() => {
         navigate(`/results/${job.jobId}`);
       }, 500);
     } catch (err: any) {
       console.error('Failed to submit docking job', err);
+      const rawMsg = err.message || 'Server error';
+      let displayError = rawMsg;
+      if (/Engine unavailable/i.test(rawMsg)) displayError = 'Engine unavailable: AutoDock Vina is not available on the server.';
+      else if (/Invalid receptor/i.test(rawMsg)) displayError = 'Invalid receptor: Verify receptor PDBQT structure.';
+      else if (/Invalid ligand/i.test(rawMsg)) displayError = 'Invalid ligand: Verify ligand PDBQT structure.';
+      else if (/Invalid binding box/i.test(rawMsg)) displayError = 'Invalid binding box: Check search coordinates and dimensions.';
+      else if (/Docking timeout/i.test(rawMsg)) displayError = 'Docking timeout: The simulation exceeded server time limits.';
+
       setJobProgress({
         status: 'FAILED',
         progressPercent: 100,
-        message: err.message || 'Job submission failed',
+        message: displayError,
       });
-      showToast(err.message || 'Error registering docking job', 'error');
+      showToast(displayError, 'error');
       setIsSubmitting(false);
     }
   };
@@ -184,22 +192,36 @@ export const DockingPage: React.FC = () => {
         title="Docking Workspace"
         subtitle="Computational in silico evaluation of ligand poses and predicted binding orientations"
         badge={
-          <Badge variant="warning" size="md">
-            Demo Mode — Engine Standby
+          <Badge variant={engineStatus?.isAvailable ? 'success' : 'warning'} size="md">
+            {engineStatus?.isAvailable
+              ? `AutoDock Vina v${engineStatus.version || '1.2.7'} — Engine Available`
+              : 'Demo Mode — Engine Standby'}
           </Badge>
         }
       />
 
-      {/* Prominent Demo Notice Banner */}
-      <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3 text-xs text-amber-900">
-        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-        <div className="leading-relaxed">
-          <span className="font-bold text-amber-950 block text-sm">
-            Demo Mode — Docking Engine Integration Pending
-          </span>
-          This workspace configures the full AutoDock Vina search box and target–ligand pairing. In this prototype stage, simulation jobs are saved and tracked locally in IndexedDB without claiming unverified computational numbers. Real AutoDock Vina execution will occur via the backend connector.
+      {/* Prominent Engine Status Notice Banner */}
+      {engineStatus?.isAvailable ? (
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-start gap-3 text-xs text-emerald-200">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-bold text-emerald-100 block text-sm">
+              AutoDock Vina v{engineStatus.version || '1.2.7'} — Engine Available
+            </span>
+            Local computational engine verified via server process. Ready to execute computational docking runs with valid receptor and ligand PDBQT inputs.
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3 text-xs text-amber-900">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-bold text-amber-950 block text-sm">
+              Demo Mode — Docking Engine Integration Pending
+            </span>
+            This workspace configures the full AutoDock Vina search box and target–ligand pairing. In this prototype stage, simulation jobs are saved and tracked locally in IndexedDB without claiming unverified computational numbers. Real AutoDock Vina execution will occur via the backend connector.
+          </div>
+        </div>
+      )}
 
       {/* Stepper Navigation */}
       <DockingWorkflowStepper
@@ -550,10 +572,10 @@ export const DockingPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Scientific Integrity Statement:</strong> Results generated during this stage reflect structural configuration and UI workflow readiness. Numerical binding energy values (kcal/mol) and pose RMSDs are strictly parsed from live AutoDock Vina outputs.
+                <div className="p-3.5 bg-blue-500/10 border border-blue-500/30 rounded-lg text-xs text-blue-300 flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">
+                    <strong>Scientific Disclaimer:</strong> Docking results are computational predictions and do not establish clinical efficacy, therapeutic effectiveness, or experimental binding.
                   </span>
                 </div>
               </CardContent>

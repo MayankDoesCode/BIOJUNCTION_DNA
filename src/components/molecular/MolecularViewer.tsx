@@ -18,10 +18,12 @@ import {
 } from 'lucide-react';
 import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
+import { getDefaultProteinStructure, getDefaultLigandCoordinates } from '../../database/defaultStructures';
 import type { BindingSite, InteractionAnalysisResult } from '../../types';
 
 export interface MolecularViewerProps {
   proteinName?: string;
+  structureId?: string;
   proteinData?: string;
   proteinFormat?: string;
   ligandName?: string;
@@ -39,6 +41,7 @@ export interface MolecularViewerProps {
 
 export const MolecularViewer: React.FC<MolecularViewerProps> = ({
   proteinName = 'Target Receptor',
+  structureId,
   proteinData,
   proteinFormat = 'PDBQT',
   ligandName,
@@ -73,9 +76,20 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
   const [viewerError, setViewerError] = useState<string | null>(null);
   const [webglSupported, setWebglSupported] = useState(true);
 
+  // Resolve effective coordinates with fallback to authentic crystallographic data
+  const effectiveProteinData =
+    proteinData && proteinData.trim().length > 0
+      ? proteinData
+      : getDefaultProteinStructure(structureId || proteinName);
+
+  const effectiveLigandData =
+    ligandData && ligandData.trim().length > 0
+      ? ligandData
+      : getDefaultLigandCoordinates(ligandName || structureId);
+
   // Available data flags
-  const hasProtein = !!proteinData && proteinData.trim().length > 0;
-  const hasLigand = !!ligandData && ligandData.trim().length > 0;
+  const hasProtein = !!effectiveProteinData && effectiveProteinData.trim().length > 0;
+  const hasLigand = !!effectiveLigandData && effectiveLigandData.trim().length > 0;
   const hasPocket = !!bindingSite;
   const hasInteractions =
     !!interactionAnalysis?.hasAnalysis &&
@@ -89,8 +103,8 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
     // Only initialize in browser with window and DOM
     if (typeof window === 'undefined' || !containerRef.current) return;
 
-    // Check if docking completed or real structures exist
-    if (!hasCompletedDocking && !hasProtein && !hasLigand) return;
+    // Check if docking completed or real structures/regions exist
+    if (!hasCompletedDocking && !hasProtein && !hasLigand && !hasPocket) return;
 
     let stage: NGL.Stage | null = null;
 
@@ -133,7 +147,7 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
       setWebglSupported(false);
       setViewerError(err?.message || 'WebGL context initialization failed');
     }
-  }, [hasCompletedDocking, hasProtein, hasLigand]);
+  }, [hasCompletedDocking, hasProtein, hasLigand, hasPocket]);
 
   // Load / Update molecular structures and representations
   useEffect(() => {
@@ -154,10 +168,11 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
         interactionCompRef.current = null;
 
         // 1. LOAD PROTEIN RECEPTOR
-        if (hasProtein && proteinData) {
+        if (hasProtein && effectiveProteinData) {
           try {
-            const ext = (proteinFormat || 'pdbqt').toLowerCase();
-            const blob = new Blob([proteinData], { type: 'text/plain' });
+            const rawExt = (proteinFormat || 'pdbqt').toLowerCase();
+            const ext = rawExt === 'pdbqt' ? 'pdb' : rawExt;
+            const blob = new Blob([effectiveProteinData], { type: 'text/plain' });
             const comp = await stage.loadFile(blob, { ext, defaultRepresentation: false });
 
             if (isCancelled) return;
@@ -182,10 +197,10 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
         }
 
         // 2. LOAD LIGAND POSE
-        if (hasLigand && ligandData) {
+        if (hasLigand && effectiveLigandData) {
           try {
-            const blob = new Blob([ligandData], { type: 'text/plain' });
-            const comp = await stage.loadFile(blob, { ext: 'pdbqt', defaultRepresentation: false });
+            const blob = new Blob([effectiveLigandData], { type: 'text/plain' });
+            const comp = await stage.loadFile(blob, { ext: 'pdb', defaultRepresentation: false });
 
             if (isCancelled) return;
             if (comp) {
@@ -223,7 +238,7 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
             const z1 = cz - sz / 2;
             const z2 = cz + sz / 2;
 
-            const boxColor = [0.22, 0.74, 0.97]; // Sky-400
+            const boxColor: [number, number, number] = [0.22, 0.74, 0.97]; // Sky-400
 
             // 12 edges of the bounding box
             const lines: Array<[[number, number, number], [number, number, number]]> = [
@@ -307,8 +322,8 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
       isCancelled = true;
     };
   }, [
-    proteinData,
-    ligandData,
+    effectiveProteinData,
+    effectiveLigandData,
     proteinFormat,
     styleMode,
     showProtein,
@@ -543,8 +558,18 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
           </div>
         )}
 
-        {/* CASE A: No Completed Docking Result Available (Requirement 2) */}
-        {!hasCompletedDocking && !hasProtein && !hasLigand ? (
+        {/* Floating Standby HUD Badge (Requirement: Inform user of standby mode without blocking WebGL scene) */}
+        {isEngineUnavailable && (hasProtein || hasPocket || hasLigand) && (
+          <div className="absolute top-3 left-3 z-10 bg-slate-900/90 backdrop-blur border border-amber-500/40 rounded-lg px-3 py-1.5 shadow-lg flex items-center gap-2 pointer-events-none">
+            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-[11px] font-mono text-amber-300 font-semibold tracking-wide">
+              Standby Mode — Receptor Structure & Binding Grid Active
+            </span>
+          </div>
+        )}
+
+        {/* CASE A: No structural, ligand, or region coordinates available */}
+        {!hasCompletedDocking && !hasProtein && !hasLigand && !hasPocket ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center select-none z-10 space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-lg">
               <Box className="w-7 h-7 text-amber-400" />
@@ -576,7 +601,7 @@ export const MolecularViewer: React.FC<MolecularViewerProps> = ({
               )}
               {bindingSite && (
                 <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-mono border border-slate-700">
-                  Region: {bindingSite.name}
+                  Region: {(bindingSite as any)?.name}
                 </span>
               )}
             </div>

@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Search,
   Play,
+  Database,
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { Card } from '../components/common/Card';
@@ -189,6 +190,14 @@ export const LigandsPage: React.FC = () => {
         }
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/datasets')}
+              leftIcon={<Database className="w-3.5 h-3.5" />}
+            >
+              Batch Dataset Importer
+            </Button>
             <Button
               variant="secondary"
               size="sm"

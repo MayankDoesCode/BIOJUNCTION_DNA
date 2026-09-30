@@ -19,14 +19,21 @@ import {
   Sparkles,
   BarChart3,
   Box,
+  Database,
+  Users,
+  PanelLeftClose,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../hooks/useAuth';
 import type { Permission } from '../types';
+import { BioJunctionLogo } from '../components/common/BioJunctionLogo';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
   pendingSyncCount?: number;
 }
 
@@ -39,7 +46,13 @@ interface NavItem {
   badge?: string | number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCount = 0 }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  onClose,
+  isCollapsed = false,
+  onToggleCollapse,
+  pendingSyncCount = 0,
+}) => {
   const { user, hasPermission } = useAuth();
 
   const allNavItems: NavItem[] = [
@@ -52,6 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
     { name: 'Docking Results', href: '/results', icon: Sparkles, section: 'docking' },
     { name: 'Candidate Comparison', href: '/comparison', icon: BarChart3, section: 'docking' },
     { name: 'Physical Prototype', href: '/prototype', icon: Box, section: 'docking' },
+    { name: 'Dataset Manager', href: '/datasets', icon: Database, section: 'docking', badge: '150+' },
 
     // Forensic Field Operations (Preserved)
     { name: 'Cases', href: '/cases', icon: Briefcase, permission: 'CASE_VIEW', section: 'field' },
@@ -67,6 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
       section: 'field',
     },
     { name: 'Audit Log', href: '/audit-log', icon: History, permission: 'AUDIT_VIEW', section: 'field' },
+    { name: 'User Management', href: '/users', icon: Users, permission: 'SETTINGS_MANAGE', section: 'field' },
     { name: 'Settings', href: '/settings', icon: Settings, permission: 'SETTINGS_MANAGE', section: 'field' },
   ];
 
@@ -93,38 +108,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
       {/* Sidebar Container */}
       <aside
         className={cn(
-          'fixed top-0 bottom-0 left-0 z-50 w-72 bg-slate-950 text-slate-200 flex flex-col transition-transform duration-300 ease-in-out border-r border-slate-800/60 shadow-xl lg:translate-x-0 lg:static lg:z-auto',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed top-0 bottom-0 left-0 z-50 bg-[#1a0509] text-[#f1f0cc] flex flex-col transition-all duration-300 ease-in-out border-r border-[#d5bf86]/30 shadow-2xl',
+          'lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:z-40',
+          isOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 lg:translate-x-0',
+          isCollapsed
+            ? 'lg:-translate-x-full lg:-ml-72 lg:w-0 lg:overflow-hidden lg:border-r-0 lg:opacity-0 pointer-events-none'
+            : 'lg:translate-x-0 lg:ml-0 lg:w-72 lg:opacity-100'
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-800/80 bg-slate-950">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-900/40">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="text-sm font-bold tracking-tight text-white block leading-tight">
-                Digital Companion
-              </span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-brand-400 block">
-                Field Drug Testing
-              </span>
-            </div>
+        <div className="h-20 flex items-center justify-between px-5 border-b border-[#d5bf86]/25 bg-[#1a0509]">
+          <BioJunctionLogo size="sm" variant="dark" />
+          <div className="flex items-center gap-1">
+            {onToggleCollapse && (
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="p-1.5 rounded-lg text-[#d5bf86] hover:text-white hover:bg-white/10 hidden lg:flex items-center justify-center transition-colors"
+                title="Hide Taskbar (Collapse sidebar)"
+                aria-label="Hide Taskbar"
+              >
+                <PanelLeftClose className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-[#d5bf86] hover:text-white hover:bg-white/10 lg:hidden"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 lg:hidden"
-            aria-label="Close menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Legal / Field Compliance Disclaimer Ribbon */}
-        <div className="bg-slate-900/90 px-4 py-2 text-[11px] text-slate-400 border-b border-slate-800 flex items-center gap-2">
-          <BadgeAlert className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="truncate">Authorized Forensic Field Use Only</span>
+        <div className="bg-[#110205] px-4 py-2 text-[11px] text-[#d5bf86] border-b border-[#d5bf86]/20 flex items-center gap-2">
+          <BadgeAlert className="w-3.5 h-3.5 text-[#a71d31] shrink-0" />
+          <span className="truncate font-semibold tracking-wide">Authorized Molecular Lab Terminal</span>
         </div>
 
         {/* Navigation Links */}
@@ -142,10 +163,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center justify-between px-3.5 py-2 rounded-lg text-sm font-medium transition-all group select-none relative overflow-hidden',
+                        'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group select-none relative',
                         isActive
-                          ? 'bg-brand-600/90 text-white shadow-md font-semibold'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                          ? 'bg-gradient-to-r from-[#a71d31] to-[#731322] text-white shadow-md font-bold'
+                          : 'text-[#f1f0cc]/80 hover:text-white hover:bg-white/10'
                       )
                     }
                   >
@@ -159,9 +180,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
           </div>
 
           {/* Molecular Docking Category */}
-          <div className="space-y-1 pt-2 border-t border-slate-800/80">
-            <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-              Molecular Docking Prototype
+          <div className="space-y-1 pt-3 border-t border-[#d5bf86]/20">
+            <div className="px-3 pb-1 text-[10px] font-black uppercase tracking-wider text-[#d5bf86]">
+              Molecular Docking Suite
             </div>
             {authorizedNavItems
               .filter((i) => i.section === 'docking')
@@ -174,10 +195,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-all group select-none relative overflow-hidden',
+                        'flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-semibold transition-all group select-none relative',
                         isActive
-                          ? 'bg-indigo-600/90 text-white shadow-md font-semibold'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                          ? 'bg-gradient-to-r from-[#a71d31] to-[#731322] text-white shadow-md font-bold'
+                          : 'text-[#f1f0cc]/80 hover:text-white hover:bg-white/10'
                       )
                     }
                   >
@@ -191,8 +212,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
           </div>
 
           {/* Field Operations Category */}
-          <div className="space-y-1 pt-2 border-t border-slate-800/80">
-            <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-cyan-400/80">
+          <div className="space-y-1 pt-3 border-t border-[#d5bf86]/20">
+            <div className="px-3 pb-1 text-[10px] font-black uppercase tracking-wider text-[#d5bf86]/80">
               Field Operations & Custody
             </div>
             {authorizedNavItems
@@ -206,10 +227,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-all group select-none relative overflow-hidden',
+                        'flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-semibold transition-all group select-none relative',
                         isActive
-                          ? 'bg-brand-600/90 text-white shadow-md font-semibold'
-                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
+                          ? 'bg-gradient-to-r from-[#a71d31] to-[#731322] text-white shadow-md font-bold'
+                          : 'text-[#f1f0cc]/80 hover:text-white hover:bg-white/10'
                       )
                     }
                   >
@@ -218,7 +239,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
                       <span>{item.name}</span>
                     </div>
                     {item.badge !== undefined && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#d5bf86]/20 text-[#d5bf86] border border-[#d5bf86]/40">
                         {item.badge}
                       </span>
                     )}
@@ -226,34 +247,49 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, pendingSyncCo
                 );
               })}
           </div>
+
+          {/* Quick Collapse Action for Desktop */}
+          {onToggleCollapse && (
+            <div className="pt-2 hidden lg:block">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-[#d5bf86]/25 text-xs font-semibold text-[#d5bf86] hover:text-white transition-all shadow-xs"
+                title="Hide Navigation Taskbar"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Hide Taskbar</span>
+              </button>
+            </div>
+          )}
         </nav>
 
         {/* Sidebar Footer with Active Role Identification */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/80 space-y-2">
+        <div className="p-4 border-t border-[#d5bf86]/20 bg-[#110205] space-y-2">
           {user && (
-            <div className="bg-slate-900/80 rounded-lg p-2.5 border border-slate-800 flex items-center justify-between">
+            <div className="bg-[#240a10] rounded-xl p-3 border border-[#d5bf86]/30 flex items-center justify-between shadow-xs">
               <div className="flex items-center gap-2 min-w-0">
-                <UserCheck className="w-4 h-4 text-brand-400 shrink-0" />
+                <UserCheck className="w-4 h-4 text-[#d5bf86] shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-200 truncate">
+                  <div className="text-xs font-bold text-white truncate">
                     {user.fullName}
                   </div>
-                  <div className="text-[10px] text-cyan-400/80 font-mono">
+                  <div className="text-[10px] text-[#d5bf86] font-mono">
                     {user.badgeNumber}
                   </div>
                 </div>
               </div>
-              <span className="text-[10px] uppercase font-bold font-mono px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30 shrink-0">
+              <span className="text-[9px] uppercase font-bold font-mono px-2 py-0.5 rounded-full bg-luxury-gold/20 text-[#d5bf86] border border-luxury-gold/40 shrink-0">
                 {user.role}
               </span>
             </div>
           )}
 
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span className="font-mono text-[11px] text-cyan-400/80">v0.2.0-stage2</span>
-            <span className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              CJIS RBAC Active
+          <div className="flex items-center justify-between text-xs text-[#d5bf86]/70 pt-1">
+            <span className="font-mono text-[10px] font-bold text-[#d5bf86]/80">v2.6-BIOJUNCTION</span>
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              ONLINE
             </span>
           </div>
         </div>

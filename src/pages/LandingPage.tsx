@@ -1,322 +1,514 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { 
-  Shield, 
-  Dna, 
-  Layers, 
-  BarChart3, 
-  Activity, 
-  FileText, 
-  ArrowRight,
-  Database,
-  FlaskConical,
+import {
+  Shield,
+  Dna,
   Crosshair,
   Sparkles,
-  Info
+  ArrowRight,
+  BarChart3,
+  FileText,
+  ChevronDown,
+  Lock,
+  CheckCircle2,
+  Atom,
 } from 'lucide-react';
-import { Button } from '../components/common/Button';
+import { BioJunctionLogo } from '../components/common/BioJunctionLogo';
+import { Hero3DScene } from '../components/landing/Hero3DScene';
+import { InteractiveConcept3D } from '../components/landing/InteractiveConcept3D';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
 
-  // Redirect authenticated users to the dashboard
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true });
     }
+
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [isAuthenticated, navigate]);
 
   if (isAuthenticated) {
-    return null; // Avoid flashing the landing page before redirect
+    return null;
   }
 
+  const handleEnterPlatform = () => {
+    navigate('/login');
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const capabilities = [
+    'PROTEIN STRUCTURES',
+    'LIGAND CANDIDATES',
+    'DOCKING ANALYSIS',
+    '3D VISUALIZATION',
+    'INTERACTION ANALYSIS',
+    'SCIENTIFIC REPORTING',
+  ];
+
+  const workflowSteps = [
+    {
+      step: '01',
+      title: 'Protein',
+      desc: 'Target macromolecule repository selection and structural integrity verification.',
+    },
+    {
+      step: '02',
+      title: 'Ligand',
+      desc: 'Candidate molecule library curation and conformational coordinate preparation.',
+    },
+    {
+      step: '03',
+      title: 'Binding Site',
+      desc: 'Search grid box configuration and active-site catalytic envelope definition.',
+    },
+    {
+      step: '04',
+      title: 'Docking',
+      desc: 'Computational energy minimization and scoring algorithm execution.',
+    },
+    {
+      step: '05',
+      title: 'Results',
+      desc: 'Multimodal binding pose parsing and free energy affinity evaluation.',
+    },
+    {
+      step: '06',
+      title: 'Analysis',
+      desc: 'Hydrogen bond vector mapping, residue contacts, and polar interaction detection.',
+    },
+    {
+      step: '07',
+      title: 'Comparison',
+      desc: 'Cross-candidate binding affinity ranking and overlay alignment.',
+    },
+    {
+      step: '08',
+      title: 'Report',
+      desc: 'Cryptographically timestamped documentation and PDF audit export.',
+    },
+  ];
+
+  const featureCards = [
+    {
+      icon: Dna,
+      title: 'Protein & Ligand Management',
+      desc: 'Curate macromolecular structures and candidate small-molecule repositories with automated validation and structural property parsing.',
+    },
+    {
+      icon: Crosshair,
+      title: 'Computational Docking',
+      desc: 'Configure flexible grid search spaces and exhaustiveness parameters to simulate candidate binding orientations and energetic scoring.',
+    },
+    {
+      icon: Atom,
+      title: '3D Visualization',
+      desc: 'Inspect predicted spatial conformations and active-site ribbon structures through lightweight, hardware-accelerated interactive viewports.',
+    },
+    {
+      icon: Sparkles,
+      title: 'Interaction Analysis',
+      desc: 'Identify critical intermolecular stabilization vectors including hydrogen bonding networks, hydrophobic contacts, and residue proximity.',
+    },
+    {
+      icon: BarChart3,
+      title: 'Candidate Comparison',
+      desc: 'Benchmark series of candidate molecules against identical target active sites to assess relative affinities and structural fit.',
+    },
+    {
+      icon: FileText,
+      title: 'Scientific Reporting',
+      desc: 'Generate comprehensive, publication-ready analysis reports with immutable audit logging and professional vector exports.',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-navy-950 text-cyan-50 font-sans selection:bg-cyan-500 selection:text-white">
-      {/* 3. NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-navy-950/80 backdrop-blur-lg border-b border-cyan-500/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-                <Shield className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-lg tracking-tight text-white">Digital Companion</span>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium text-cyan-200">
-              <a href="#workflow" className="hover:text-white transition-colors">Workflow</a>
-              <a href="#features" className="hover:text-white transition-colors">Platform</a>
-              <a href="#integrity" className="hover:text-white transition-colors">Research Integrity</a>
-            </div>
+    <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 overflow-x-hidden relative">
+      {/* Background Subtle Scientific Grid */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-20 z-0"
+        style={{
+          backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.15) 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+        }}
+      />
 
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => navigate('/login')}
-                className="text-sm font-medium text-cyan-100 hover:text-white transition-colors"
-              >
-                Login
-              </button>
-              <Button 
-                variant="primary" 
-                size="sm" 
-                onClick={() => navigate('/login')}
-                className="hidden sm:flex shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-              >
-                Enter Platform
-              </Button>
-            </div>
+      {/* Ambient Lighting Gradients */}
+      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 right-1/4 w-[650px] h-[650px] bg-blue-700/10 rounded-full blur-[160px] pointer-events-none z-0" />
+
+      {/* ========================================================================= */}
+      {/* NAVBAR (Section 10)                                                       */}
+      {/* ========================================================================= */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-[#030712]/85 backdrop-blur-xl border-b border-cyan-500/20 py-3 shadow-2xl'
+            : 'bg-transparent py-5'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          {/* Logo */}
+          <div
+            onClick={() => scrollToSection('hero')}
+            className="cursor-pointer flex items-center gap-2"
+          >
+            <BioJunctionLogo size="sm" variant="dark" />
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+            <button
+              onClick={() => scrollToSection('hero')}
+              className="hover:text-cyan-400 transition-colors"
+            >
+              Platform
+            </button>
+            <button
+              onClick={() => scrollToSection('workflow')}
+              className="hover:text-cyan-400 transition-colors"
+            >
+              Workflow
+            </button>
+            <button
+              onClick={() => scrollToSection('technology')}
+              className="hover:text-cyan-400 transition-colors"
+            >
+              Technology
+            </button>
+            <button
+              onClick={() => scrollToSection('integrity')}
+              className="hover:text-cyan-400 transition-colors"
+            >
+              Integrity
+            </button>
+          </nav>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleEnterPlatform}
+              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white px-3 sm:px-4 py-2 rounded-xl transition-colors"
+            >
+              LOGIN
+            </button>
+            <button
+              onClick={handleEnterPlatform}
+              className="text-xs sm:text-sm font-bold bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-400/30 transition-all flex items-center gap-1.5"
+            >
+              <span>ENTER PLATFORM</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* 4. HERO SECTION */}
-      <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Abstract Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/20 to-transparent blur-3xl rounded-full"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
-            <div className="max-w-2xl animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold tracking-widest uppercase mb-6 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                <Sparkles className="w-3.5 h-3.5" />
-                Computational Molecular Docking
+      {/* ========================================================================= */}
+      {/* HERO SECTION (Sections 3-9, 11)                                           */}
+      {/* ========================================================================= */}
+      <section
+        id="hero"
+        className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 min-h-[90vh] flex items-center z-10"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Content (Section 9) */}
+            <div className="lg:col-span-6 space-y-6 sm:space-y-8 text-center lg:text-left">
+              {/* Small Tag */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-xs font-mono font-bold tracking-wider text-cyan-300">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span>COMPUTATIONAL MOLECULAR DOCKING</span>
               </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight mb-6 drop-shadow-md">
-                Explore Protein–Ligand Interactions <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">
-                  Through Computational Docking
-                </span>
+
+              {/* Main Heading */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
+                Explore Protein–Ligand Interactions Through Computational Docking.
               </h1>
-              
-              <p className="text-lg text-cyan-100/80 leading-relaxed mb-8 max-w-xl">
-                Analyze predicted binding poses, docking scores, molecular interactions, and candidate compounds through an integrated computational workflow.
+
+              {/* Supporting Text */}
+              <p className="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Analyze predicted docking poses, computational affinity, molecular interactions,
+                candidate comparisons, and scientific reports through an integrated workflow.
               </p>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Button 
-                  variant="primary" 
-                  size="lg" 
-                  onClick={() => navigate('/login')}
-                  className="w-full sm:w-auto text-base font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)]"
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
+
+              {/* Hero Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <button
+                  onClick={handleEnterPlatform}
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-sm shadow-xl shadow-cyan-500/25 hover:shadow-cyan-400/35 transition-all flex items-center justify-center gap-2"
                 >
-                  Enter Platform
-                </Button>
-                <a 
-                  href="#workflow"
-                  className="w-full sm:w-auto px-6 py-3 rounded-lg border border-cyan-500/30 bg-navy-900/40 backdrop-blur-md text-cyan-100 font-semibold text-center hover:bg-navy-800/60 transition-all shadow-[0_0_10px_rgba(6,182,212,0.1)]"
+                  <span>ENTER PLATFORM</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => scrollToSection('workflow')}
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-cyan-500/30 text-slate-200 font-bold text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  Explore Workflow
-                </a>
+                  <span>EXPLORE WORKFLOW</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Notice */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-slate-400 font-mono">
+                <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Secure Terminal Authorization Required for Laboratory Workspaces</span>
               </div>
             </div>
 
-            {/* 5. HERO VISUAL */}
-            <div className="relative lg:h-[500px] flex items-center justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <div className="relative w-full max-w-md aspect-square bg-navy-900/40 backdrop-blur-xl border border-cyan-500/30 rounded-full shadow-[0_0_50px_rgba(6,182,212,0.15)] flex items-center justify-center overflow-hidden">
-                {/* Simulated 3D representation */}
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
-                <div className="absolute inset-4 rounded-full border border-cyan-500/20 animate-[spin_60s_linear_infinite]"></div>
-                <div className="absolute inset-12 rounded-full border border-indigo-500/20 animate-[spin_40s_linear_infinite_reverse]"></div>
-                
-                <div className="relative z-10 flex flex-col items-center">
-                  <Dna className="w-32 h-32 text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)] animate-pulse-glow" />
-                  <div className="mt-4 px-3 py-1 rounded bg-navy-950/80 border border-cyan-500/30 text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest">
-                    Illustrative molecular visualization
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* 6. HERO DATA STRIP */}
-      <div className="border-y border-cyan-500/20 bg-navy-900/40 backdrop-blur-md relative z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 text-center divide-x divide-cyan-500/20">
-            <div className="space-y-1">
-              <Database className="w-5 h-5 text-cyan-400 mx-auto mb-2 opacity-80" />
-              <div className="text-xs font-bold text-cyan-50 tracking-wider">PROTEIN STRUCTURES</div>
-              <div className="text-[10px] text-cyan-400/80">Manage target receptors</div>
-            </div>
-            <div className="space-y-1">
-              <FlaskConical className="w-5 h-5 text-indigo-400 mx-auto mb-2 opacity-80" />
-              <div className="text-xs font-bold text-cyan-50 tracking-wider">LIGAND CANDIDATES</div>
-              <div className="text-[10px] text-cyan-400/80">Evaluate small molecules</div>
-            </div>
-            <div className="space-y-1">
-              <Activity className="w-5 h-5 text-emerald-400 mx-auto mb-2 opacity-80" />
-              <div className="text-xs font-bold text-cyan-50 tracking-wider">DOCKING ANALYSIS</div>
-              <div className="text-[10px] text-cyan-400/80">Execute in silico predictions</div>
-            </div>
-            <div className="space-y-1">
-              <Layers className="w-5 h-5 text-brand-400 mx-auto mb-2 opacity-80" />
-              <div className="text-xs font-bold text-cyan-50 tracking-wider">3D VISUALIZATION</div>
-              <div className="text-[10px] text-cyan-400/80">Inspect binding modes</div>
+            {/* Right: 3D Molecular Motion Scene (Sections 3-8, 11) */}
+            <div className="lg:col-span-6 h-[440px] sm:h-[500px] lg:h-[580px] w-full relative rounded-3xl overflow-hidden border border-cyan-500/20 bg-gradient-to-b from-slate-950/60 to-[#020617]/90 shadow-2xl">
+              <Hero3DScene className="w-full h-full" />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 7. WORKFLOW SECTION */}
-      <section id="workflow" className="py-24 relative">
+      {/* ========================================================================= */}
+      {/* CAPABILITY STRIP (Section 12)                                             */}
+      {/* ========================================================================= */}
+      <section className="py-6 border-y border-cyan-500/20 bg-slate-950/70 backdrop-blur-md relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">From Structure to Docking Insight</h2>
-            <p className="text-cyan-100/80">A streamlined computational pipeline to predict and evaluate protein–ligand binding modes under controlled configurations.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            {/* Connecting Line */}
-            <div className="hidden lg:block absolute top-12 left-24 right-24 h-0.5 bg-gradient-to-r from-cyan-500/10 via-cyan-500/40 to-cyan-500/10 z-0"></div>
-
-            {[
-              { step: '01', title: 'Protein & Ligand', desc: 'Select or upload target protein structures and candidate molecules.' },
-              { step: '02', title: 'Binding Site', desc: 'Define the docking search region and structural parameters.' },
-              { step: '03', title: 'Docking', desc: 'Run the configured AutoDock Vina computational workflow.' },
-              { step: '04', title: 'Analyze & Compare', desc: 'Inspect predicted poses, compare results, and generate scientific reports.' }
-            ].map((item, idx) => (
-              <div key={idx} className="relative z-10 glass-panel p-6 rounded-2xl flex flex-col items-center text-center hover:-translate-y-1 transition-transform duration-300">
-                <div className="w-12 h-12 rounded-full bg-navy-950 border border-cyan-500/50 flex items-center justify-center text-cyan-400 font-mono font-bold text-lg mb-4 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                  {item.step}
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-xs text-cyan-100/70 leading-relaxed">{item.desc}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+            {capabilities.map((item, idx) => (
+              <div key={idx} className="flex flex-col items-center justify-center p-2">
+                <span className="text-[11px] font-mono font-bold tracking-widest text-cyan-300/90">
+                  {item}
+                </span>
+                <span className="w-4 h-0.5 bg-cyan-500/40 mt-1.5 rounded-full" />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 8. PLATFORM FEATURES */}
-      <section id="features" className="py-24 bg-navy-900/20 border-t border-cyan-500/10">
+      {/* ========================================================================= */}
+      {/* WORKFLOW SECTION (Section 13)                                             */}
+      {/* ========================================================================= */}
+      <section id="workflow" className="py-24 sm:py-32 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">Platform Features</h2>
-            <p className="text-cyan-100/80 max-w-2xl">Core computational capabilities integrated into a cohesive, browser-based professional environment.</p>
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span className="text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase">
+              End-to-End Pipeline
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              From Structure to Computational Insight
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base">
+              An integrated eight-stage computational protocol connecting structural inputs to
+              actionable molecular affinity rankings and evidentiary analysis.
+            </p>
+          </div>
+
+          {/* 8-Step Interactive Pipeline Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {workflowSteps.map((step, idx) => (
+              <div
+                key={idx}
+                className="p-6 rounded-2xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-400/50 hover:bg-slate-900/90 transition-all duration-300 flex flex-col justify-between group shadow-lg"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-black font-mono text-cyan-400/80 group-hover:text-cyan-300">
+                      {step.step}
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-cyan-500/30 group-hover:bg-cyan-400 transition-colors" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-200 transition-colors">
+                    {step.title}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{step.desc}</p>
+                </div>
+                <div className="mt-6 pt-3 border-t border-slate-800 text-[10px] font-mono text-slate-500 group-hover:text-cyan-400 transition-colors flex items-center justify-between">
+                  <span>STAGE {step.step} PROTOCOL</span>
+                  <span>&rarr;</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* INTERACTIVE 3D SECTION: VISUALIZE MOLECULAR CONCEPT (Section 14)          */}
+      {/* ========================================================================= */}
+      <section
+        id="technology"
+        className="py-20 sm:py-28 bg-gradient-to-b from-transparent via-slate-950/80 to-transparent relative z-10 border-t border-cyan-500/10"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+            <span className="text-xs font-mono font-bold text-amber-400 tracking-widest uppercase">
+              Interactive 3D Exploration
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Visualize the Molecular Concept
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base">
+              Observe how candidate ligands navigate conformational orientations to form predicted
+              non-covalent contacts within a target receptor envelope.
+            </p>
+          </div>
+
+          {/* Interactive 3D Docking Canvas */}
+          <div className="max-w-5xl mx-auto">
+            <InteractiveConcept3D />
+          </div>
+
+          {/* Disclaimer callout */}
+          <div className="mt-6 text-center max-w-2xl mx-auto text-xs text-slate-400 font-mono">
+            * Purely illustrative computational visualization. Graphic models represent abstract
+            spatial geometry and do not reflect experimental crystallographic data or clinical
+            outcomes.
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* FEATURES GRID (Section 15)                                                */}
+      {/* ========================================================================= */}
+      <section className="py-24 sm:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <span className="text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase">
+              Platform Features
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Engineered for Computational Rigor
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base">
+              A comprehensive computational suite built with structured data pipelines, automated
+              audit trails, and clear scientific interpretation boundaries.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard 
-              icon={<Database className="w-6 h-6 text-cyan-400" />}
-              title="Protein & Ligand Management"
-              description="Manage and validate the molecular structure datasets used for computational docking pipelines."
-            />
-            <FeatureCard 
-              icon={<Activity className="w-6 h-6 text-indigo-400" />}
-              title="Real Docking Workflow"
-              description="Execute computational docking predictions locally using the configured AutoDock Vina engine integration."
-            />
-            <FeatureCard 
-              icon={<Layers className="w-6 h-6 text-emerald-400" />}
-              title="3D Molecular Visualization"
-              description="Inspect docked poses and binding conformations interactively using the WebGL molecular viewport."
-            />
-            <FeatureCard 
-              icon={<Crosshair className="w-6 h-6 text-amber-400" />}
-              title="Interaction Analysis"
-              description="Review geometrically detected hydrogen bonds, hydrophobic contacts, and interacting target residues."
-            />
-            <FeatureCard 
-              icon={<BarChart3 className="w-6 h-6 text-brand-400" />}
-              title="Candidate Comparison"
-              description="Compare multiple candidate docking results directly under equivalent configured computational conditions."
-            />
-            <FeatureCard 
-              icon={<FileText className="w-6 h-6 text-rose-400" />}
-              title="Scientific Reporting"
-              description="Generate structured, auditable PDF reports from completed docking ledgers and interaction analysis."
-            />
+            {featureCards.map((feat, idx) => {
+              const Icon = feat.icon;
+              return (
+                <div
+                  key={idx}
+                  className="p-8 rounded-3xl bg-slate-900/50 border border-cyan-500/20 hover:border-cyan-400/50 hover:bg-slate-900/80 transition-all duration-300 group shadow-xl flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-6 group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-200 transition-colors">
+                      {feat.title}
+                    </h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">{feat.desc}</p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-1.5 text-xs font-mono font-semibold text-cyan-400/80">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Active Workflow Capability</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* 9. SCIENTIFIC INTEGRITY SECTION */}
-      <section id="integrity" className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950 via-indigo-950/20 to-navy-950 pointer-events-none"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <Info className="w-8 h-8 text-cyan-500 mx-auto mb-6 opacity-80" />
-          <h2 className="text-2xl font-bold text-white mb-4">Computational Results, Not Experimental Proof</h2>
-          <div className="glass-panel p-6 rounded-2xl text-cyan-100/90 text-sm leading-relaxed inline-block text-left">
-            The platform provides computational predictions of possible protein–ligand binding configurations based on physical models. Docking scores and predicted interactions support computational comparison and hypothesis generation, but they <strong>do not establish clinical efficacy, safety, or experimental confirmation</strong>. All in silico results require rigorous laboratory validation.
+      {/* ========================================================================= */}
+      {/* SCIENTIFIC INTEGRITY (Section 16)                                         */}
+      {/* ========================================================================= */}
+      <section
+        id="integrity"
+        className="py-16 sm:py-20 border-y border-cyan-500/20 bg-slate-950/90 relative z-10"
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="w-12 h-12 rounded-full bg-cyan-500/10 border border-cyan-500/30 mx-auto flex items-center justify-center text-cyan-400">
+            <Shield className="w-6 h-6" />
           </div>
-        </div>
-      </section>
 
-      {/* 11. CALL TO ACTION */}
-      <section className="py-24 border-t border-cyan-500/20 relative">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl font-black text-white mb-4">Ready to explore a docking analysis?</h2>
-          <p className="text-cyan-100/80 mb-8 text-lg">
-            Enter the platform to upload structures, configure docking parameters, inspect results, compare candidates, and generate scientific reports.
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Computational Insight, Not Experimental Proof
+          </h2>
+
+          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            The platform provides computational predictions of possible protein–ligand binding
+            configurations. Docking scores and predicted interactions support computational
+            comparison but do not establish experimental confirmation or clinical efficacy.
           </p>
-          <Button 
-            variant="primary" 
-            size="lg" 
-            onClick={() => navigate('/login')}
-            className="shadow-[0_0_30px_rgba(6,182,212,0.5)] font-bold text-base px-10"
-          >
-            Enter Platform
-          </Button>
+
+          <div className="pt-2 flex items-center justify-center gap-6 text-xs font-mono text-slate-400">
+            <span>• In Silico Estimation</span>
+            <span>• Non-Clinical Disclaimer</span>
+            <span>• Forensic Evidence Protocol</span>
+          </div>
         </div>
       </section>
 
-      {/* 14. FOOTER */}
-      <footer className="bg-navy-950 border-t border-navy-800 py-12 text-sm text-cyan-100/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-cyan-600" />
-              <span className="font-bold text-white tracking-tight">Digital Companion</span>
-            </div>
-            <p className="max-w-xs mb-4">
-              Computational molecular docking and protein–ligand interaction analysis platform.
-            </p>
-            <p className="text-[10px] text-cyan-100/40 uppercase tracking-widest font-mono">
-              Computational predictions require experimental validation.
-            </p>
+      {/* ========================================================================= */}
+      {/* FINAL CTA (Section 17)                                                    */}
+      {/* ========================================================================= */}
+      <section className="py-24 sm:py-32 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <span className="text-xs font-mono font-bold text-cyan-400 tracking-widest uppercase">
+            Authorized Personnel Access
+          </span>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+            Explore Molecular Docking.
+          </h2>
+
+          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Enter the platform to configure computational docking analyses, inspect predicted
+            results, compare candidates, and generate reports.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={handleEnterPlatform}
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-sm sm:text-base shadow-2xl shadow-cyan-500/30 hover:shadow-cyan-400/40 transition-all flex items-center justify-center gap-2"
+            >
+              <span>ENTER PLATFORM</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleEnterPlatform}
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/30 text-white font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2"
+            >
+              <Lock className="w-4 h-4 text-cyan-400" />
+              <span>LOGIN WITH CREDENTIALS</span>
+            </button>
           </div>
-          
-          <div>
-            <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider">Navigation</h4>
-            <ul className="space-y-2">
-              <li><a href="#features" className="hover:text-cyan-400 transition-colors">Platform</a></li>
-              <li><a href="#workflow" className="hover:text-cyan-400 transition-colors">Workflow</a></li>
-              <li><a href="#integrity" className="hover:text-cyan-400 transition-colors">Research Integrity</a></li>
-            </ul>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* FOOTER                                                                    */}
+      {/* ========================================================================= */}
+      <footer className="py-12 border-t border-cyan-500/10 bg-slate-950 text-xs font-mono text-slate-500 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-300">BIOJUNCTION TERMINAL</span>
+            <span>•</span>
+            <span>COMPUTATIONAL DRUG-PROTEIN PLATFORM</span>
           </div>
 
-          <div>
-            <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-wider">Access</h4>
-            <ul className="space-y-2">
-              <li>
-                <button onClick={() => navigate('/login')} className="hover:text-cyan-400 transition-colors">
-                  Login to Platform
-                </button>
-              </li>
-            </ul>
+          <div className="flex items-center gap-6">
+            <span>OFFLINE CAPABLE</span>
+            <span>RESTRICTED ACCESS</span>
+            <span>v2.6.0</span>
           </div>
         </div>
       </footer>
     </div>
   );
 };
-
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-  <div className="glass-panel p-6 rounded-2xl hover:bg-navy-800/60 transition-colors group border-cyan-500/20 hover:border-cyan-500/50">
-    <div className="w-12 h-12 rounded-xl bg-navy-950 border border-cyan-500/30 flex items-center justify-center mb-4 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-shadow">
-      {icon}
-    </div>
-    <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-    <p className="text-xs text-cyan-100/70 leading-relaxed">{description}</p>
-  </div>
-);

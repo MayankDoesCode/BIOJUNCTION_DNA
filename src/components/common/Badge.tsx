@@ -19,13 +19,13 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-navy-800/60 text-cyan-200 border-cyan-500/30',
-  primary: 'bg-blue-50 text-blue-700 border-blue-200',
-  success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  warning: 'bg-amber-50 text-amber-800 border-amber-200',
-  danger: 'bg-rose-50 text-rose-700 border-rose-200',
-  neutral: 'bg-navy-800/60 text-cyan-300 border-cyan-500/30',
-  outline: 'bg-transparent text-cyan-200 border-cyan-400/40',
+  default: 'bg-luxury-gold/20 text-luxury-maroon border-luxury-gold/50 font-bold',
+  primary: 'bg-luxury-crimson/15 text-luxury-crimson border-luxury-crimson/30 font-bold',
+  success: 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold',
+  warning: 'bg-amber-50 text-amber-800 border-amber-300 font-bold',
+  danger: 'bg-rose-50 text-rose-800 border-rose-300 font-bold',
+  neutral: 'bg-[#f1f0cc] text-luxury-taupe border-[#d5bf86]/40 font-semibold',
+  outline: 'bg-transparent text-luxury-maroon border-[#d5bf86]/60 font-semibold',
 };
 
 const dotColors: Record<BadgeVariant, string> = {

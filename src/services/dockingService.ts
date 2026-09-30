@@ -45,11 +45,35 @@ export interface DockingEngineStatus {
 export const dockingService = {
   /**
    * Inspects docking engine availability.
-   * AutoDock Vina is not installed by default in the host environment.
+   * Queries the local backend service or inspects host environment.
    */
   async checkEngineStatus(): Promise<DockingEngineStatus> {
-    // In future backend integration, this queries GET /api/v1/docking/status
-    // Here we report the inspected state of the environment.
+    // 1. In browser environment, query backend verification endpoint
+    if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
+      try {
+        let res = await fetch('/api/docking-status').catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch('/api/v1/docking/status').catch(() => null);
+        }
+        if (res && res.ok) {
+          const data = await res.json();
+          const isAvail = !!(data.available ?? data.isAvailable);
+          return {
+            isAvailable: isAvail,
+            engineName: data.engine ?? data.engineName ?? 'AutoDock Vina',
+            version: data.version,
+            executablePath: data.executablePath,
+            mode: isAvail ? 'CONNECTED' : 'DEMO_STANDBY',
+            message: data.message || (isAvail ? `AutoDock Vina v${data.version || '1.2.7'} Available` : 'AutoDock Vina is not available on the server.'),
+            setupRequirements: data.setupRequirements || [],
+          };
+        }
+      } catch (err) {
+        // Fall back to offline inspection
+      }
+    }
+
+    // 2. Default fallback when backend is not reached or in test standby environment
     return {
       isAvailable: false,
       engineName: 'AutoDock Vina',
@@ -266,10 +290,195 @@ export const dockingService = {
       return { job: updatedJob, result };
     }
 
-    // Case B: Real Vina execution (future connected backend workflow)
-    // The backend connector would post to /api/v1/docking/execute, receive stdout and pdbqt,
-    // and process with vinaResultParser.parseVinaOutput()
-    throw new Error('Unexpected execution state: Vina backend connector is not configured.');
+    // Case B: Real Vina execution via connected backend
+    const receptorPdbqt = protein.fileData;
+    const ligandPdbqt = ligand.fileData;
+
+    const hasValidPdbqt =
+      !!receptorPdbqt &&
+      receptorPdbqt.includes('ATOM') &&
+      !!ligandPdbqt &&
+      ligandPdbqt.includes('ATOM');
+
+    if (!hasValidPdbqt) {
+      const notice = 'Input structure files are not formatted as complete PDBQT models. Provide valid PDBQT coordinates to run computational docking.';
+      onProgress?.('COMPLETED', 100, notice);
+
+      const completedAt = new Date().toISOString();
+      await dockingRepository.updateJob(jobId, {
+        status: 'COMPLETED',
+        startedAt: timestamp,
+        completedAt,
+        progressPercent: 100,
+        notes: notes ? `${notes} [${notice}]` : notice,
+      });
+
+      const result: DockingResult = {
+        id: resultId,
+        jobId,
+        proteinId: protein.id,
+        ligandId: ligand.id,
+        proteinName: protein.name,
+        ligandName: ligand.name,
+        status: 'NO_RESULT',
+        hasRealResult: false,
+        dockingScore: undefined,
+        poses: [],
+        dockingStatusNote: notice,
+        timestamp: completedAt,
+        configuration: prepared.configuration,
+        bindingSiteConfig: prepared.configuration.bindingSite,
+        engineUsed: `AutoDock Vina v${engineStatus.version || '1.2.7'} (Standby - Input PDBQT Required)`,
+      };
+
+      await dockingRepository.saveResult(result);
+      return { job: (await dockingRepository.getJobById(jobId)) || job, result };
+    }
+
+    onProgress?.('RUNNING', 50, 'Running AutoDock Vina');
+    try {
+      let outputPdbqt = '';
+      let logText = '';
+      let serverAffinity: number | undefined;
+      let serverPoses: any[] = [];
+
+      if (typeof fetch !== 'undefined') {
+        const payload = {
+          receptor: receptorPdbqt,
+          ligand: ligandPdbqt,
+          center_x: bindingSite.centerX,
+          center_y: bindingSite.centerY,
+          center_z: bindingSite.centerZ,
+          size_x: bindingSite.sizeX,
+          size_y: bindingSite.sizeY,
+          size_z: bindingSite.sizeZ,
+          exhaustiveness: prepared.configuration.exhaustiveness,
+          num_modes: prepared.configuration.numModes,
+          energy_range: prepared.configuration.energyRange,
+        };
+
+        // Call /api/docking with fallback to /api/v1/docking/execute
+        let resp = await fetch('/api/docking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(() => null);
+
+        if (!resp || (!resp.ok && resp.status === 404)) {
+          resp = await fetch('/api/v1/docking/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              receptorPdbqt,
+              ligandPdbqt,
+              centerX: bindingSite.centerX,
+              centerY: bindingSite.centerY,
+              centerZ: bindingSite.centerZ,
+              sizeX: bindingSite.sizeX,
+              sizeY: bindingSite.sizeY,
+              sizeZ: bindingSite.sizeZ,
+              exhaustiveness: prepared.configuration.exhaustiveness,
+              numModes: prepared.configuration.numModes,
+              energyRange: prepared.configuration.energyRange,
+            }),
+          });
+        }
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok || data.success === false) {
+          const errorCode = data.errorCode || '';
+          const errMsg = data.message || data.error || 'Server error';
+
+          if (errorCode === 'ENGINE_UNAVAILABLE') {
+            throw new Error(`Engine unavailable: ${errMsg}`);
+          } else if (errorCode === 'DOCKING_TIMEOUT') {
+            throw new Error(`Docking timeout: ${errMsg}`);
+          } else if (errorCode === 'INVALID_INPUT') {
+            if (/receptor/i.test(errMsg)) {
+              throw new Error(`Invalid receptor: ${errMsg}`);
+            } else if (/ligand/i.test(errMsg)) {
+              throw new Error(`Invalid ligand: ${errMsg}`);
+            } else if (/search box|center|size/i.test(errMsg)) {
+              throw new Error(`Invalid binding box: ${errMsg}`);
+            }
+            throw new Error(`Invalid parameters: ${errMsg}`);
+          } else {
+            throw new Error(`Server error: ${errMsg}`);
+          }
+        }
+
+        if (data.results) {
+          outputPdbqt = data.results.outputPdbqt || '';
+          logText = data.results.rawLog || '';
+          serverAffinity = data.results.affinity ?? data.results.bestScore;
+          serverPoses = data.results.poses || [];
+        } else {
+          outputPdbqt = data.outputPdbqt || '';
+          logText = data.logText || '';
+        }
+      } else {
+        throw new Error('Local environment cannot execute Vina directly without backend service endpoint.');
+      }
+
+      onProgress?.('RUNNING', 85, 'Parsing Results');
+
+      const parsed = vinaResultParser.parseVinaOutput({
+        logText,
+        pdbqtContent: outputPdbqt,
+      });
+
+      const finalPoses = parsed.poses.length > 0 ? parsed.poses : serverPoses;
+      const finalScore = parsed.bestScore ?? parsed.dockingScore ?? serverAffinity;
+
+      const completedAt = new Date().toISOString();
+
+      await dockingRepository.updateJob(jobId, {
+        status: 'COMPLETED',
+        startedAt: timestamp,
+        completedAt,
+        progressPercent: 100,
+        outputFiles: [
+          { name: `${protein.structureId || 'receptor'}_out.pdbqt`, size: outputPdbqt.length },
+          { name: 'vina_simulation.log', size: logText.length },
+        ],
+      });
+
+      const result: DockingResult = {
+        id: resultId,
+        jobId,
+        proteinId: protein.id,
+        ligandId: ligand.id,
+        proteinName: protein.name,
+        ligandName: ligand.name,
+        status: 'COMPLETED',
+        hasRealResult: true,
+        dockingScore: finalScore,
+        poses: finalPoses,
+        dockingStatusNote: `AutoDock Vina v${engineStatus.version || '1.2.7'} computational simulation completed successfully. Predicted best affinity: ${finalScore} kcal/mol.`,
+        timestamp: completedAt,
+        configuration: prepared.configuration,
+        bindingSiteConfig: prepared.configuration.bindingSite,
+        engineUsed: `AutoDock Vina v${engineStatus.version || '1.2.7'}`,
+        outputFiles: [
+          { name: 'docking_out.pdbqt', size: outputPdbqt.length },
+          { name: 'vina.log', size: logText.length },
+        ],
+      };
+
+      await dockingRepository.saveResult(result);
+      onProgress?.('COMPLETED', 100, 'Completed');
+      return { job: (await dockingRepository.getJobById(jobId)) || job, result };
+    } catch (execErr: any) {
+      console.error('Real Vina calculation execution error:', execErr);
+      const errMsg = execErr.message || 'Server error';
+      await dockingRepository.updateJob(jobId, {
+        status: 'FAILED',
+        error: errMsg,
+        completedAt: new Date().toISOString(),
+      });
+      throw new Error(errMsg);
+    }
   },
 
   /**

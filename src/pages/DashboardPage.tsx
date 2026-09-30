@@ -24,6 +24,9 @@ import {
   LogOut,
   Maximize2,
   RotateCw,
+  Database,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/common/Card';
@@ -52,6 +55,7 @@ export const DashboardPage: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('P-543');
   const [isRotating, setIsRotating] = useState(false);
+  const [isBottomHudHidden, setIsBottomHudHidden] = useState(false);
 
   const [stats, setStats] = useState({
     activeCases: 0,
@@ -108,7 +112,7 @@ export const DashboardPage: React.FC = () => {
     {
       id: 1,
       author: 'Dr. Iris Thorne',
-      avatarColor: 'from-pink-500 to-rose-500',
+      avatarColor: 'from-amber-600 to-rose-600',
       action: 'commented on P-543',
       comment: 'Docking score improved by 18% with relaxed active-site water shell.',
       time: '14m ago',
@@ -118,7 +122,7 @@ export const DashboardPage: React.FC = () => {
     {
       id: 2,
       author: 'Prof. Alana Chen',
-      avatarColor: 'from-cyan-500 to-blue-500',
+      avatarColor: 'from-blue-600 to-indigo-700',
       action: 'approved P-601 report',
       comment: 'Binding conformation verified in high-resolution crystallographic lattice.',
       time: '1h ago',
@@ -128,12 +132,42 @@ export const DashboardPage: React.FC = () => {
     {
       id: 3,
       author: 'Commander R. Reyes',
-      avatarColor: 'from-indigo-500 to-purple-500',
+      avatarColor: 'from-emerald-600 to-teal-700',
       action: 'sealed chain-of-custody',
       comment: 'Evidentiary protocol verified for seizure Case #2026-TX-089.',
       time: '3h ago',
       badge: 'Audit Seal',
       badgeVariant: 'warning' as const,
+    },
+    {
+      id: 4,
+      author: 'Dr. Julian Vance',
+      avatarColor: 'from-purple-600 to-indigo-800',
+      action: 'imported PDB structures',
+      comment: 'Expanded 20 target proteins and 20 candidate ligands into database cache.',
+      time: '4h ago',
+      badge: 'Dataset',
+      badgeVariant: 'default' as const,
+    },
+    {
+      id: 5,
+      author: 'Specialist Nora Diaz',
+      avatarColor: 'from-rose-600 to-red-800',
+      action: 'spectrometry match',
+      comment: 'RAMAN spectral baseline matched target fentanyl analogue with 98.4% confidence.',
+      time: '6h ago',
+      badge: 'Verified',
+      badgeVariant: 'success' as const,
+    },
+    {
+      id: 6,
+      author: 'Lab Director Patel',
+      avatarColor: 'from-amber-700 to-yellow-600',
+      action: 'recalibrated simulation',
+      comment: 'AutoDock Vina search grid aligned to active catalytic dyad His41-Cys145.',
+      time: '8h ago',
+      badge: 'Grid 0.375Å',
+      badgeVariant: 'neutral' as const,
     },
   ];
 
@@ -257,80 +291,109 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 font-sans selection:bg-cyan-500 selection:text-navy-950">
+    <div className="space-y-8 font-sans selection:bg-luxury-crimson selection:text-luxury-cream">
+      {/* Quick Dataset Manager Banner */}
+      <div className="bg-gradient-to-r from-[#1a0509] to-[#2e0910] text-[#f1f0cc] p-4 sm:p-5 rounded-2xl border border-[#d5bf86]/40 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#a71d31]/30 border border-[#a71d31]/50 flex items-center justify-center text-amber-300 shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-white flex items-center gap-2">
+              Large Scientific & Forensic Enterprise Dataset Available
+              <span className="px-2 py-0.5 rounded-full bg-[#a71d31] text-[10px] font-bold text-white">150+ Records</span>
+            </div>
+            <div className="text-xs text-[#d5bf86]/80 mt-0.5">
+              Instantly populate 20+ PDB target proteins, 20+ candidate molecules, forensic cases, or import custom CSV/JSON files.
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate('/datasets')}
+            className="bg-gradient-to-r from-[#a71d31] to-[#731322] hover:from-[#c2243b] text-white font-bold text-xs"
+            leftIcon={<Database className="w-3.5 h-3.5" />}
+          >
+            Open Dataset Manager
+          </Button>
+        </div>
+      </div>
+
       {/* 
         =============================================================================
-        SECTION 1: HOLOGRAPHIC BIO-SYNTHESIS ANALYTICS HUD (MATCHING CONCEPT IMAGE)
+        SECTION 1: BIO-SYNTHESIS ANALYTICS HUD - LUXURY THEME
         =============================================================================
       */}
-      <div className="relative rounded-[28px] sm:rounded-[36px] bg-[#040e1f]/85 backdrop-blur-2xl border border-cyan-400/40 shadow-[0_0_60px_rgba(6,182,212,0.22),0_20px_60px_-15px_rgba(0,0,0,0.85)] overflow-hidden transition-all duration-300">
+      <div className="relative rounded-[28px] sm:rounded-[36px] bg-white/90 backdrop-blur-2xl border border-[#d5bf86]/50 shadow-xl overflow-hidden transition-all duration-300">
         
-        {/* Subtle Ambient HUD Glow Highlights */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 rounded-[28px] sm:rounded-[36px] pointer-events-none border border-cyan-300/10" />
+        {/* Subtle Ambient Glow Highlights */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-luxury-gold/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-luxury-crimson/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 rounded-[28px] sm:rounded-[36px] pointer-events-none border border-white/60" />
 
         {/* Top HUD Frame Header */}
-        <div className="px-6 py-3.5 border-b border-cyan-500/20 flex items-center justify-between bg-gradient-to-r from-cyan-950/30 via-slate-900/20 to-fuchsia-950/20 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-mono font-bold tracking-wider text-cyan-200">
+        <div className="px-6 py-4 border-b border-[#d5bf86]/30 flex items-center justify-between bg-gradient-to-r from-[#fbfaf3] via-white to-[#f8f7ee] text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-mono font-bold tracking-wider text-luxury-maroon">
               BIO-SYNTHESIS ANALYTICS TERMINAL
             </span>
-            <span className="text-cyan-500/40 hidden sm:inline">|</span>
-            <span className="text-[11px] font-mono text-cyan-400/70 hidden sm:inline">
+            <span className="text-[#d5bf86] hidden sm:inline">|</span>
+            <span className="text-[11px] font-mono text-luxury-taupe font-semibold hidden sm:inline">
               HUD v4.2 • SIMULATION ACTIVE
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-cyan-400/80">
-            <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-950/50 border border-cyan-500/30 font-mono text-[10px] text-cyan-300">
-              <Activity className="w-3 h-3 text-cyan-400 animate-pulse" />
+          <div className="flex items-center gap-3 text-luxury-taupe">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-luxury-gold/20 border border-luxury-gold/50 font-mono text-[10px] text-luxury-maroon font-bold">
+              <Activity className="w-3 h-3 text-luxury-crimson animate-pulse" />
               <span>RMSD: {activeProject.rmsd}</span>
-              <span className="text-cyan-600">•</span>
+              <span className="text-luxury-gold">•</span>
               <span>SCORE: {activeProject.score}</span>
             </div>
 
             <button
               onClick={() => showToast('HUD Diagnostics: Subsystems synchronized', 'info')}
-              className="p-1.5 rounded-lg hover:bg-cyan-500/15 hover:text-cyan-200 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-luxury-gold/20 hover:text-luxury-maroon transition-colors"
               title="Search Telemetry"
             >
               <Search className="w-4 h-4" />
             </button>
             <button
               onClick={() => showToast('2 unread system alerts in telemetry log', 'info')}
-              className="p-1.5 rounded-lg hover:bg-cyan-500/15 hover:text-cyan-200 transition-colors relative"
+              className="p-1.5 rounded-lg hover:bg-luxury-gold/20 hover:text-luxury-maroon transition-colors relative"
               title="Alert Notifications"
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-luxury-crimson animate-pulse" />
             </button>
           </div>
         </div>
 
         {/* 3-Column Holographic Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-cyan-500/20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#d5bf86]/30">
           
           {/* ========================================================================= */}
-          {/* COLUMN 1: Project Pipeline (Left Panel)                                   */}
+          {/* COLUMN 1: Project Pipeline (Left Panel) - LOCKED HEIGHT                   */}
           {/* ========================================================================= */}
-          <div className="lg:col-span-3 p-5 sm:p-6 flex flex-col justify-between bg-gradient-to-b from-[#030c1d]/60 to-[#020814]/80">
+          <div className="lg:col-span-3 p-5 sm:p-6 flex flex-col justify-between bg-gradient-to-b from-[#fbfaf3] to-[#f8f7ee] lg:h-[660px]">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-cyan-400" />
-                  <h3 className="font-bold text-sm tracking-wide text-cyan-100">
+                  <Layers className="w-4 h-4 text-luxury-crimson" />
+                  <h3 className="font-extrabold text-sm tracking-wide text-luxury-maroon">
                     Project Pipeline
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-cyan-400/70">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-luxury-gold/20 text-luxury-maroon border border-luxury-gold/40">
                   {pipelineProjects.length} ACTIVE
                 </span>
               </div>
 
-              {/* Project Card List matching concept image */}
-              <div className="space-y-3">
+              {/* Project Card List with LOCKED HEIGHT & smooth scroll */}
+              <div className="h-[480px] overflow-y-auto space-y-3 pr-1.5 scrollbar-thin">
                 {pipelineProjects.map((proj) => {
                   const isSelected = proj.id === selectedProjectId;
                   return (
@@ -340,39 +403,39 @@ export const DashboardPage: React.FC = () => {
                         setSelectedProjectId(proj.id);
                         showToast(`Switched telemetry focus to ${proj.name}`, 'info');
                       }}
-                      className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-left relative overflow-hidden group ${
+                      className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer text-left relative overflow-hidden group shadow-2xs ${
                         isSelected
-                          ? 'bg-gradient-to-r from-cyan-950/70 to-navy-900/80 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/50'
-                          : 'bg-navy-950/40 hover:bg-cyan-950/30 border-cyan-500/20 hover:border-cyan-400/40'
+                          ? 'bg-white border-2 border-luxury-maroon shadow-md ring-1 ring-luxury-maroon/20'
+                          : 'bg-white hover:bg-[#faf8f0] border-[#d5bf86]/40 hover:border-luxury-gold'
                       }`}
                     >
                       {/* Active indicator bar */}
                       {isSelected && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 to-fuchsia-500" />
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-luxury-crimson to-luxury-gold" />
                       )}
 
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-mono font-bold text-xs text-white group-hover:text-cyan-200 transition-colors">
+                      <div className="flex items-center justify-between mb-1.5 pl-1">
+                        <span className="font-mono font-bold text-xs text-luxury-maroon group-hover:text-luxury-crimson transition-colors">
                           {proj.name}
                         </span>
                         {proj.status === 'Active' || proj.status === 'Completed' ? (
-                          <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-400">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                           </div>
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400">
+                          <div className="w-5 h-5 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700">
                             <Clock className="w-3 h-3" />
                           </div>
                         )}
                       </div>
 
-                      <div className="text-[11px] text-cyan-300/80 truncate mb-2">
+                      <div className="text-[11px] text-slate-700 font-medium truncate mb-2 pl-1">
                         {proj.target}
                       </div>
 
-                      <div className="flex items-center justify-between pt-1 border-t border-cyan-500/20 text-[10px] font-mono">
-                        <span className="text-cyan-400/70">PDB: {proj.pdbId}</span>
-                        <span className="text-emerald-400 font-semibold">{proj.score}</span>
+                      <div className="flex items-center justify-between pt-1.5 border-t border-[#d5bf86]/20 text-[10px] font-mono pl-1">
+                        <span className="text-luxury-taupe font-semibold">PDB: {proj.pdbId}</span>
+                        <span className="text-emerald-700 font-bold">{proj.score}</span>
                       </div>
                     </div>
                   );
@@ -381,19 +444,19 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Quick action button */}
-            <div className="mt-5 pt-4 border-t border-cyan-500/20 space-y-2">
+            <div className="mt-4 pt-3 border-t border-[#d5bf86]/30 space-y-2">
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => navigate('/docking')}
                 leftIcon={<Play className="w-3.5 h-3.5" />}
-                className="w-full text-xs font-semibold py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-md"
+                className="w-full text-xs font-bold py-2.5 rounded-xl bg-luxury-crimson hover:bg-luxury-maroon text-white shadow-md transition-colors"
               >
                 Launch In Silico Docking
               </Button>
               <button
                 onClick={() => navigate('/comparison')}
-                className="w-full text-center text-[11px] text-cyan-400 hover:text-cyan-200 font-mono py-1 transition-colors"
+                className="w-full text-center text-[11px] text-luxury-maroon hover:text-luxury-crimson font-bold font-mono py-1 transition-colors"
               >
                 Compare Candidates &rarr;
               </button>
@@ -403,27 +466,27 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {/* COLUMN 2: Bio-Synthesis Analytics Hero & Analytics Charts (Center Panel)   */}
           {/* ========================================================================= */}
-          <div className="lg:col-span-6 p-5 sm:p-6 flex flex-col justify-between space-y-6">
+          <div className="lg:col-span-6 p-5 sm:p-6 flex flex-col justify-between space-y-4 lg:h-[660px]">
             
             {/* Top Subheader */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-luxury-maroon flex items-center gap-2">
                   <span>Bio-Synthesis Analytics</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-luxury-gold/20 text-luxury-maroon border border-luxury-gold/50">
                     {activeProject.pdbId}
                   </span>
                 </h2>
-                <p className="text-xs text-cyan-300/70 font-mono mt-0.5">
-                  Target Interface: {activeProject.target}
+                <p className="text-xs text-luxury-taupe font-mono mt-0.5">
+                  Target Interface: <span className="font-bold text-luxury-maroon">{activeProject.target}</span>
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsRotating(!isRotating)}
-                  className={`p-2 rounded-xl border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 transition-colors ${
-                    isRotating ? 'bg-cyan-500/20 text-cyan-200 ring-1 ring-cyan-400' : ''
+                  className={`p-2 rounded-xl border border-[#d5bf86]/50 text-luxury-maroon hover:bg-luxury-gold/20 transition-colors shadow-2xs ${
+                    isRotating ? 'bg-luxury-gold/30 text-luxury-crimson ring-1 ring-luxury-crimson/40' : 'bg-white'
                   }`}
                   title="Toggle 3D Rotation"
                 >
@@ -434,7 +497,7 @@ export const DashboardPage: React.FC = () => {
                   size="sm"
                   onClick={() => navigate('/results')}
                   leftIcon={<Maximize2 className="w-3.5 h-3.5" />}
-                  className="text-xs border-cyan-500/40 text-cyan-200 hover:bg-cyan-500/20"
+                  className="text-xs border-[#d5bf86] text-luxury-maroon hover:bg-luxury-gold/20 font-bold bg-white shadow-2xs"
                 >
                   Full 3D Viewer
                 </Button>
@@ -442,25 +505,25 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* 3D Molecular Complex HUD Visualizer Canvas (Hero) */}
-            <div className="relative h-64 sm:h-72 rounded-2xl bg-gradient-to-b from-[#020b18] via-[#05152d] to-[#020b18] border border-cyan-500/30 overflow-hidden flex items-center justify-center group shadow-inner">
+            <div className="relative h-64 sm:h-72 rounded-2xl bg-gradient-to-b from-[#fcfbf7] via-[#f5f3dc] to-[#ede9cb] border border-[#d5bf86]/50 overflow-hidden flex items-center justify-center group shadow-inner">
               
-              {/* Background holographic grid lines inside canvas */}
+              {/* Background warm grid lines inside canvas */}
               <div 
-                className="absolute inset-0 opacity-20 pointer-events-none"
+                className="absolute inset-0 opacity-25 pointer-events-none"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.2) 1px, transparent 1px)`,
+                  backgroundImage: `linear-gradient(rgba(213, 191, 134, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(213, 191, 134, 0.4) 1px, transparent 1px)`,
                   backgroundSize: '24px 24px',
                 }}
               />
 
               {/* Glowing Particle Flares */}
-              <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute bottom-1/4 right-1/3 w-32 h-32 bg-fuchsia-500/20 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-luxury-gold/30 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute bottom-1/4 right-1/3 w-32 h-32 bg-luxury-crimson/20 rounded-full blur-2xl pointer-events-none" />
 
               {/* Central Holographic 3D Molecular Ribbon SVG */}
               <svg
                 viewBox="0 0 500 280"
-                className={`w-full h-full max-h-64 object-contain filter drop-shadow-[0_0_15px_rgba(6,182,212,0.6)] ${
+                className={`w-full h-full max-h-64 object-contain filter drop-shadow-[0_4px_12px_rgba(63,13,18,0.15)] ${
                   isRotating ? 'animate-pulse' : ''
                 }`}
                 fill="none"
@@ -468,18 +531,18 @@ export const DashboardPage: React.FC = () => {
               >
                 <defs>
                   <linearGradient id="helix-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#22d3ee" />
-                    <stop offset="50%" stopColor="#06b6d4" />
-                    <stop offset="100%" stopColor="#0284c7" />
+                    <stop offset="0%" stopColor="#a71d31" />
+                    <stop offset="50%" stopColor="#8e1829" />
+                    <stop offset="100%" stopColor="#3f0d12" />
                   </linearGradient>
                   <linearGradient id="helix-magenta" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#f472b6" />
-                    <stop offset="50%" stopColor="#ec4899" />
-                    <stop offset="100%" stopColor="#d946ef" />
+                    <stop offset="0%" stopColor="#f1f0cc" />
+                    <stop offset="50%" stopColor="#d5bf86" />
+                    <stop offset="100%" stopColor="#8d775f" />
                   </linearGradient>
                   <linearGradient id="ligand-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fde047" />
-                    <stop offset="100%" stopColor="#eab308" />
+                    <stop offset="0%" stopColor="#d5bf86" />
+                    <stop offset="100%" stopColor="#a71d31" />
                   </linearGradient>
                 </defs>
 
@@ -576,14 +639,14 @@ export const DashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               {/* Card 1: Binding Affinity Over Time */}
-              <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 hover:border-cyan-400/40 transition-all flex flex-col justify-between">
+              <div className="p-4 rounded-2xl bg-white border border-[#d5bf86]/40 hover:border-luxury-gold shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-cyan-100">
+                  <span className="text-xs font-bold text-luxury-maroon">
                     Binding Affinity Over Time
                   </span>
                   <button
                     onClick={() => navigate('/comparison')}
-                    className="text-[11px] font-mono text-cyan-400 hover:text-cyan-200 flex items-center gap-0.5"
+                    className="text-[11px] font-mono text-luxury-crimson hover:text-luxury-maroon font-bold flex items-center gap-0.5"
                   >
                     <span>Analysis</span>
                     <ChevronRight className="w-3 h-3" />
@@ -594,62 +657,62 @@ export const DashboardPage: React.FC = () => {
                 <div className="h-28 w-full relative">
                   <svg viewBox="0 0 200 100" className="w-full h-full" fill="none">
                     {/* Horizontal reference grid lines */}
-                    <line x1="0" y1="25" x2="200" y2="25" stroke="rgba(6,182,212,0.15)" strokeWidth="1" strokeDasharray="2 2" />
-                    <line x1="0" y1="50" x2="200" y2="50" stroke="rgba(6,182,212,0.15)" strokeWidth="1" strokeDasharray="2 2" />
-                    <line x1="0" y1="75" x2="200" y2="75" stroke="rgba(6,182,212,0.15)" strokeWidth="1" strokeDasharray="2 2" />
+                    <line x1="0" y1="25" x2="200" y2="25" stroke="rgba(213, 191, 134, 0.25)" strokeWidth="1" strokeDasharray="2 2" />
+                    <line x1="0" y1="50" x2="200" y2="50" stroke="rgba(213, 191, 134, 0.25)" strokeWidth="1" strokeDasharray="2 2" />
+                    <line x1="0" y1="75" x2="200" y2="75" stroke="rgba(213, 191, 134, 0.25)" strokeWidth="1" strokeDasharray="2 2" />
 
-                    {/* Gradient Fill under Cyan Curve */}
+                    {/* Gradient Fill under Crimson Curve */}
                     <defs>
-                      <linearGradient id="area-cyan" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                      <linearGradient id="area-crimson" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#a71d31" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#a71d31" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
                     <path
                       d="M 10 75 Q 40 68 70 52 T 130 35 T 190 28 L 190 95 L 10 95 Z"
-                      fill="url(#area-cyan)"
+                      fill="url(#area-crimson)"
                     />
 
-                    {/* Cyan Target Curve (P-543) */}
+                    {/* Crimson Target Curve (P-543) */}
                     <path
                       d="M 10 75 Q 40 68 70 52 T 130 35 T 190 28"
-                      stroke="#22d3ee"
+                      stroke="#a71d31"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
-                    <circle cx="190" cy="28" r="3.5" fill="#22d3ee" />
+                    <circle cx="190" cy="28" r="3.5" fill="#a71d31" />
 
-                    {/* Orange Baseline Curve (Reference) */}
+                    {/* Amber Baseline Curve (Reference) */}
                     <path
                       d="M 10 82 Q 50 78 90 68 T 150 58 T 190 52"
-                      stroke="#fb923c"
+                      stroke="#d5bf86"
                       strokeWidth="2"
                       strokeDasharray="3 3"
                       strokeLinecap="round"
                     />
-                    <circle cx="190" cy="52" r="3" fill="#fb923c" />
+                    <circle cx="190" cy="52" r="3" fill="#d5bf86" />
                   </svg>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-cyan-400/80 pt-1 border-t border-cyan-500/20">
-                  <span className="flex items-center gap-1 text-cyan-300">
-                    <span className="w-2 h-0.5 bg-cyan-400" /> {activeProject.id} ({activeProject.score})
+                <div className="flex items-center justify-between text-[10px] font-mono text-luxury-taupe pt-1.5 border-t border-[#d5bf86]/20">
+                  <span className="flex items-center gap-1 font-bold text-luxury-maroon">
+                    <span className="w-2 h-0.5 bg-luxury-crimson" /> {activeProject.id} ({activeProject.score})
                   </span>
-                  <span className="flex items-center gap-1 text-orange-400">
-                    <span className="w-2 h-0.5 bg-orange-400 border border-dashed" /> Ref (-7.1)
+                  <span className="flex items-center gap-1 font-semibold text-amber-700">
+                    <span className="w-2 h-0.5 bg-luxury-gold border border-dashed" /> Ref (-7.1)
                   </span>
                 </div>
               </div>
 
               {/* Card 2: Interaction Hotspots Heatmap Matrix */}
-              <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 hover:border-cyan-400/40 transition-all flex flex-col justify-between">
+              <div className="p-4 rounded-2xl bg-white border border-[#d5bf86]/40 hover:border-luxury-gold shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-cyan-100">
+                  <span className="text-xs font-bold text-luxury-maroon">
                     Interaction Hotspots
                   </span>
                   <button
                     onClick={() => navigate('/results')}
-                    className="text-[11px] font-mono text-cyan-400 hover:text-cyan-200 flex items-center gap-0.5"
+                    className="text-[11px] font-mono text-luxury-crimson hover:text-luxury-maroon font-bold flex items-center gap-0.5"
                   >
                     <span>Analysis</span>
                     <ChevronRight className="w-3 h-3" />
@@ -660,7 +723,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="space-y-1 my-1">
                   {heatmapData.map((row, rowIdx) => (
                     <div key={rowIdx} className="flex items-center gap-1">
-                      <span className="w-10 text-[9px] font-mono text-cyan-400/70 truncate text-right pr-1">
+                      <span className="w-10 text-[9px] font-mono text-luxury-taupe font-bold truncate text-right pr-1">
                         {hotspotResidues[rowIdx]}
                       </span>
                       <div className="flex-1 grid grid-cols-6 gap-1">
@@ -680,10 +743,10 @@ export const DashboardPage: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-cyan-400/80 pt-1 border-t border-cyan-500/20">
-                  <span>Weak (Blue)</span>
-                  <span className="text-amber-400">Mid</span>
-                  <span className="text-rose-400">Strong (Red)</span>
+                <div className="flex items-center justify-between text-[10px] font-mono text-luxury-taupe pt-1.5 border-t border-[#d5bf86]/20 font-semibold">
+                  <span className="text-blue-700">Weak</span>
+                  <span className="text-amber-700">Mid</span>
+                  <span className="text-rose-700">Strong</span>
                 </div>
               </div>
 
@@ -691,35 +754,38 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* ========================================================================= */}
-          {/* COLUMN 3: Team Activity Feed (Right Panel)                                */}
+          {/* COLUMN 3: Team Activity Feed (Right Panel) - LOCKED HEIGHT & HIGH CONTRAST */}
           {/* ========================================================================= */}
-          <div className="lg:col-span-3 p-5 sm:p-6 flex flex-col justify-between bg-gradient-to-b from-[#030c1d]/60 to-[#020814]/80">
+          <div className="lg:col-span-3 p-5 sm:p-6 flex flex-col justify-between bg-gradient-to-b from-[#fbfaf3] to-[#f8f7ee] lg:h-[660px]">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-cyan-400" />
-                  <h3 className="font-bold text-sm tracking-wide text-cyan-100">
+                  <Activity className="w-4 h-4 text-luxury-crimson" />
+                  <h3 className="font-extrabold text-sm tracking-wide text-luxury-maroon">
                     Team Activity Feed
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono text-emerald-400">REALTIME</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  REALTIME
+                </span>
               </div>
 
-              {/* Feed items matching concept image */}
-              <div className="space-y-3">
+              {/* Feed items with LOCKED HEIGHT and smooth scroll */}
+              <div className="h-[480px] overflow-y-auto space-y-3 pr-1.5 scrollbar-thin">
                 {teamActivities.map((act) => (
                   <div
                     key={act.id}
-                    className="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/20 hover:border-cyan-400/40 transition-all text-xs group"
+                    className="p-3.5 rounded-2xl bg-white border border-[#d5bf86]/40 hover:border-luxury-gold shadow-2xs hover:shadow-xs transition-all text-xs group"
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2 min-w-0">
                         <div
-                          className={`w-6 h-6 rounded-full bg-gradient-to-tr ${act.avatarColor} flex items-center justify-center text-[10px] font-bold text-white shadow-sm`}
+                          className={`w-6 h-6 rounded-full bg-gradient-to-tr ${act.avatarColor} flex items-center justify-center text-[10px] font-bold text-white shadow-xs shrink-0`}
                         >
                           {act.author.charAt(0)}
                         </div>
-                        <span className="font-semibold text-cyan-100 text-[11px] group-hover:text-white truncate">
+                        <span className="font-bold text-luxury-maroon text-[11px] group-hover:text-luxury-crimson transition-colors truncate">
                           {act.author}
                         </span>
                       </div>
@@ -728,12 +794,17 @@ export const DashboardPage: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <p className="text-[11px] text-cyan-300/80 leading-relaxed pl-8">
+                    <div className="text-[10px] text-luxury-taupe font-semibold pl-8 mb-1.5">
+                      {act.action}
+                    </div>
+
+                    <p className="text-[11px] text-slate-800 font-medium leading-relaxed pl-8 bg-[#faf8f0] p-2.5 rounded-xl border border-[#d5bf86]/20">
                       {act.comment}
                     </p>
 
-                    <div className="text-[10px] font-mono text-cyan-500/70 text-right mt-1.5">
-                      {act.time}
+                    <div className="text-[10px] font-mono font-semibold text-luxury-taupe text-right mt-1.5 flex items-center justify-end gap-1">
+                      <Clock className="w-3 h-3 text-luxury-gold" />
+                      <span>{act.time}</span>
                     </div>
                   </div>
                 ))}
@@ -741,68 +812,92 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Quick Audit Log Shortcut */}
-            <div className="mt-5 pt-4 border-t border-cyan-500/20">
+            <div className="mt-4 pt-3 border-t border-[#d5bf86]/30">
               <button
-                onClick={() => navigate('/audit')}
-                className="w-full py-2 px-3 rounded-xl bg-navy-950/80 hover:bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 text-xs font-mono text-center flex items-center justify-center gap-1.5 transition-colors"
+                type="button"
+                onClick={() => navigate('/audit-log')}
+                className="w-full py-2.5 px-3 rounded-xl bg-luxury-maroon text-white hover:bg-luxury-crimson font-bold text-xs font-mono text-center flex items-center justify-center gap-2 shadow-xs transition-colors"
               >
                 <span>View Full Audit Log</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-3.5 h-3.5 text-luxury-gold" />
               </button>
             </div>
           </div>
 
         </div>
 
-        {/* Bottom HUD Station Bar matching image: Home, Settings, User Dr. Vance, Logout */}
-        <div className="px-6 py-3 border-t border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-cyan-950/30 via-slate-900/40 to-fuchsia-950/20 text-xs">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/')}
-              className="p-1.5 rounded-lg text-cyan-400 hover:text-cyan-200 hover:bg-cyan-500/15 transition-colors"
-              title="Return to Public Portal"
-            >
-              <Home className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => navigate('/settings')}
-              className="p-1.5 rounded-lg text-cyan-400 hover:text-cyan-200 hover:bg-cyan-500/15 transition-colors"
-              title="System Configuration"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-            <span className="text-cyan-500/30">|</span>
-            <span className="text-[11px] font-mono text-cyan-400/80">
-              Station Terminal: TER-4091A • Offline Cache Ready
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-navy-950/80 border border-cyan-500/30">
-              <div className="w-6 h-6 rounded-full overflow-hidden border border-cyan-400">
-                <img
-                  src="/images/dr-vance-avatar.jpg"
-                  alt="Dr. E. Vance"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="text-xs font-medium text-white">
-                User: <span className="text-cyan-300 font-semibold">{user?.fullName || 'Dr. E. Vance'}</span>
-              </span>
-              <span className="text-[10px] font-mono text-cyan-400/70">
-                ({user?.role || 'SUPERVISOR'})
+        {/* Bottom HUD Station Bar matching luxury scheme: Home, Settings, User Dr. Vance, Logout */}
+        {!isBottomHudHidden ? (
+          <div className="px-6 py-3.5 border-t border-[#d5bf86]/30 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-[#fbfaf3] via-white to-[#f8f7ee] text-xs transition-all">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/')}
+                className="p-1.5 rounded-lg text-luxury-maroon hover:text-luxury-crimson hover:bg-luxury-gold/20 transition-colors"
+                title="Return to Public Portal"
+              >
+                <Home className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => navigate('/settings')}
+                className="p-1.5 rounded-lg text-luxury-maroon hover:text-luxury-crimson hover:bg-luxury-gold/20 transition-colors"
+                title="System Configuration"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <span className="text-luxury-gold/50">|</span>
+              <span className="text-[11px] font-mono text-luxury-taupe font-semibold">
+                Station Terminal: TER-4091A • Offline Cache Ready
               </span>
             </div>
 
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#d5bf86]/40 shadow-xs">
+                <div className="w-6 h-6 rounded-full overflow-hidden border border-luxury-gold">
+                  <img
+                    src="/images/dr-vance-avatar.jpg"
+                    alt="Dr. E. Vance"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs font-semibold text-luxury-maroon">
+                  User: <span className="text-luxury-crimson font-bold">{user?.fullName || 'Dr. E. Vance'}</span>
+                </span>
+                <span className="text-[10px] font-mono text-luxury-taupe">
+                  ({user?.role || 'SUPERVISOR'})
+                </span>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-800 text-xs font-mono font-semibold transition-all flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Logout</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsBottomHudHidden(true)}
+                className="p-1.5 rounded-lg text-luxury-taupe hover:text-luxury-maroon hover:bg-luxury-gold/20 transition-colors ml-1"
+                title="Hide Station Taskbar"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 py-2 border-t border-[#d5bf86]/30 bg-[#fbfaf3] flex justify-end">
             <button
-              onClick={handleLogout}
-              className="px-3 py-1 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 hover:text-rose-100 text-xs font-mono font-semibold transition-all flex items-center gap-1.5"
+              type="button"
+              onClick={() => setIsBottomHudHidden(false)}
+              className="text-[11px] font-mono font-bold text-luxury-maroon hover:text-luxury-crimson flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#d5bf86]/40 shadow-xs hover:bg-luxury-gold/10 transition-colors"
+              title="Restore Station Taskbar"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
+              <ChevronUp className="w-3.5 h-3.5 text-luxury-crimson" />
+              <span>Show Station Taskbar</span>
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 
@@ -810,17 +905,17 @@ export const DashboardPage: React.FC = () => {
         SECTION 2: END-TO-END COMPUTATIONAL WORKFLOW & OPERATIONAL MODULES
         =============================================================================
       */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-card border border-indigo-500/30 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#fcfbf7] via-white to-[#f8f7ee] rounded-2xl p-6 sm:p-8 text-luxury-maroon shadow-md border border-[#d5bf86]/50 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1.5 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[11px] font-semibold border border-indigo-500/30">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-luxury-gold/25 text-luxury-maroon text-[11px] font-bold border border-luxury-gold/50">
+              <Sparkles className="w-3.5 h-3.5 text-luxury-crimson" />
               Docking Verification Pipeline
             </div>
-            <h3 className="text-xl font-bold tracking-tight text-white">
+            <h3 className="text-xl font-black tracking-tight text-luxury-maroon">
               Drug–Protein Molecular Docking
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-luxury-taupe font-medium leading-relaxed">
               Interactive in silico platform for simulating candidate drug binding affinities with structural macromolecules.
             </p>
           </div>
@@ -830,7 +925,7 @@ export const DashboardPage: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={() => navigate('/docking')}
-              className="bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all"
+              className="bg-gradient-to-r from-luxury-maroon to-luxury-crimson text-luxury-cream text-xs font-bold shadow-md hover:shadow-lg transition-all"
               leftIcon={<Play className="w-3.5 h-3.5" />}
             >
               Open Docking Workspace
@@ -839,7 +934,7 @@ export const DashboardPage: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate('/prototype')}
-              className="bg-slate-800/80 text-slate-200 border-slate-600 hover:bg-slate-700 hover:text-white text-xs transition-colors"
+              className="bg-white text-luxury-maroon border-[#d5bf86]/60 hover:bg-luxury-gold/20 text-xs transition-colors font-semibold"
             >
               Physical Prototype Guide
             </Button>

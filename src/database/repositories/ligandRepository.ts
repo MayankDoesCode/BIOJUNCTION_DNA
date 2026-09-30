@@ -1,5 +1,6 @@
 import { db } from '../db';
 import { DEMO_LIGANDS } from '../seedData';
+import { getDefaultLigandCoordinates } from '../defaultStructures';
 import type { Ligand } from '../../types';
 
 export const ligandRepository = {
@@ -12,14 +13,31 @@ export const ligandRepository = {
     if (count === 0) {
       await db.ligands.bulkAdd(DEMO_LIGANDS);
     }
-    return db.ligands.orderBy('uploadDate').reverse().toArray();
+    const list = await db.ligands.orderBy('uploadDate').reverse().toArray();
+    return list.map((l) => {
+      if (!l.fileData) {
+        return {
+          ...l,
+          fileData: getDefaultLigandCoordinates(l.name),
+        };
+      }
+      return l;
+    });
   },
 
   /**
    * Retrieves a candidate molecule by ID.
    */
   async getById(id: string): Promise<Ligand | undefined> {
-    return db.ligands.get(id);
+    const l = await db.ligands.get(id);
+    if (!l) return undefined;
+    if (!l.fileData) {
+      return {
+        ...l,
+        fileData: getDefaultLigandCoordinates(l.name),
+      };
+    }
+    return l;
   },
 
   /**

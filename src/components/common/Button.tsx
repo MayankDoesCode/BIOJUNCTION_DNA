@@ -30,12 +30,12 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantStyles = {
-    primary: 'bg-brand-600 hover:bg-brand-700 text-white focus:ring-brand-500 shadow-sm border border-transparent',
-    navy: 'bg-slate-900 hover:bg-slate-800 text-white focus:ring-slate-700 shadow-sm border border-transparent',
-    secondary: 'bg-navy-800/60 hover:bg-slate-200 text-cyan-100 focus:ring-slate-300 border border-cyan-500/30',
-    outline: 'bg-navy-900/40 backdrop-blur-md hover:bg-navy-950/60 text-cyan-200 border border-cyan-400/40 focus:ring-brand-500 shadow-sm',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500 shadow-sm border border-transparent',
-    ghost: 'bg-transparent hover:bg-navy-800/60 text-cyan-200 focus:ring-slate-300 border border-transparent',
+    primary: 'bg-gradient-to-r from-luxury-maroon to-luxury-crimson hover:opacity-90 text-luxury-cream focus:ring-luxury-crimson shadow-md border border-transparent font-bold',
+    navy: 'bg-luxury-maroon hover:bg-luxury-maroon/90 text-luxury-cream focus:ring-luxury-maroon shadow-md border border-transparent font-bold',
+    secondary: 'bg-white hover:bg-luxury-gold/20 text-luxury-maroon focus:ring-luxury-gold border border-[#d5bf86]/50 font-semibold shadow-xs',
+    outline: 'bg-white/80 backdrop-blur-md hover:bg-white text-luxury-maroon border border-[#d5bf86]/60 focus:ring-luxury-gold shadow-xs font-semibold',
+    danger: 'bg-rose-700 hover:bg-rose-800 text-white focus:ring-rose-500 shadow-sm border border-transparent font-semibold',
+    ghost: 'bg-transparent hover:bg-luxury-gold/15 text-luxury-maroon focus:ring-luxury-gold border border-transparent font-semibold',
   };
 
   return (

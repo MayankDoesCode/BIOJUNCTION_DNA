@@ -20,6 +20,12 @@ import type {
   Protein,
   Ligand,
 } from '../types';
+import {
+  STRUCTURE_1HSG,
+  STRUCTURE_6LU7,
+  LIGAND_1HSG_MK1,
+  LIGAND_6LU7_N3,
+} from './defaultStructures';
 
 export const DEMO_USERS: User[] = [
   {
@@ -487,6 +493,7 @@ export const DEMO_PROTEINS: Protein[] = [
     fileName: '6LU7_prepared.pdbqt',
     fileFormat: 'PDBQT',
     fileSize: 348210,
+    fileData: STRUCTURE_6LU7,
     uploadDate: '2026-09-15T10:00:00Z',
     status: 'READY',
     organism: 'Severe acute respiratory syndrome coronavirus 2',
@@ -501,6 +508,7 @@ export const DEMO_PROTEINS: Protein[] = [
     fileName: '1HSG_receptor.pdbqt',
     fileFormat: 'PDBQT',
     fileSize: 284100,
+    fileData: STRUCTURE_1HSG,
     uploadDate: '2026-09-16T14:30:00Z',
     status: 'READY',
     organism: 'Human immunodeficiency virus 1',
@@ -525,6 +533,7 @@ export const DEMO_LIGANDS: Ligand[] = [
     fileName: 'candidate_drug_a.pdbqt',
     fileFormat: 'PDBQT',
     fileSize: 1845,
+    fileData: LIGAND_6LU7_N3,
     isDemo: true,
     uploadDate: '2026-09-20T08:00:00Z',
     status: 'READY',
@@ -540,6 +549,7 @@ export const DEMO_LIGANDS: Ligand[] = [
     fileName: 'candidate_drug_b.pdbqt',
     fileFormat: 'PDBQT',
     fileSize: 1620,
+    fileData: LIGAND_1HSG_MK1,
     isDemo: true,
     uploadDate: '2026-09-20T08:15:00Z',
     status: 'READY',
@@ -555,6 +565,7 @@ export const DEMO_LIGANDS: Ligand[] = [
     fileName: 'candidate_drug_c.pdbqt',
     fileFormat: 'PDBQT',
     fileSize: 1990,
+    fileData: LIGAND_1HSG_MK1,
     isDemo: true,
     uploadDate: '2026-09-20T08:30:00Z',
     status: 'READY',

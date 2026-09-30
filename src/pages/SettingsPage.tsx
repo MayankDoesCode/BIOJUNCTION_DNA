@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   RotateCcw,
   Save,
+  Users,
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/common/Card';
@@ -13,6 +15,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
 
 export const SettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const { user } = useAuth();
   const [isResetting, setIsResetting] = useState(false);
@@ -97,6 +100,36 @@ export const SettingsPage: React.FC = () => {
               </div>
               <Badge variant="primary">{currentUser.role}</Badge>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Operator Access Control & User Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personnel Access Control & Authorization</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-xs">
+          <p className="text-luxury-taupe leading-relaxed">
+            Only System Administrators have authorization to review incoming operator sign-up requests, approve or revoke terminal access, and assign security roles.
+          </p>
+
+          <div className="p-4 bg-luxury-cream/40 border border-[#d5bf86]/40 rounded-xl flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <span className="font-bold text-luxury-maroon block">Operator Directory & Pending Approvals</span>
+              <span className="text-luxury-taupe text-[11px]">
+                Review incoming access requests, manage active personnel, and provision field accounts.
+              </span>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate('/users')}
+              leftIcon={<Users className="w-3.5 h-3.5" />}
+              className="bg-luxury-crimson hover:bg-luxury-maroon text-white font-bold"
+            >
+              Open User Management
+            </Button>
           </div>
         </CardContent>
       </Card>

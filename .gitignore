@@ -41,3 +41,6 @@ build/
 *.sln
 *.sw?
 .DS_Store
+
+# Local binary executables
+*.exe

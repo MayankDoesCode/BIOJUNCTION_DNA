@@ -1,5 +1,6 @@
 import { db } from '../db';
 import { DEMO_PROTEINS } from '../seedData';
+import { getDefaultProteinStructure } from '../defaultStructures';
 import type { Protein } from '../../types';
 
 export const proteinRepository = {
@@ -12,14 +13,31 @@ export const proteinRepository = {
     if (count === 0) {
       await db.proteins.bulkAdd(DEMO_PROTEINS);
     }
-    return db.proteins.orderBy('uploadDate').reverse().toArray();
+    const list = await db.proteins.orderBy('uploadDate').reverse().toArray();
+    return list.map((p) => {
+      if (!p.fileData) {
+        return {
+          ...p,
+          fileData: getDefaultProteinStructure(p.structureId || p.name),
+        };
+      }
+      return p;
+    });
   },
 
   /**
    * Retrieves a target protein by ID.
    */
   async getById(id: string): Promise<Protein | undefined> {
-    return db.proteins.get(id);
+    const p = await db.proteins.get(id);
+    if (!p) return undefined;
+    if (!p.fileData) {
+      return {
+        ...p,
+        fileData: getDefaultProteinStructure(p.structureId || p.name),
+      };
+    }
+    return p;
   },
 
   /**

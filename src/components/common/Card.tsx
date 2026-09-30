@@ -14,8 +14,8 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'bg-navy-900/40 backdrop-blur-md rounded-xl shadow-card transition-all',
-        bordered && 'border border-cyan-500/30/80',
+        'bg-white/90 backdrop-blur-md rounded-2xl shadow-card transition-all text-luxury-maroon',
+        bordered && 'border border-[#d5bf86]/40',
         className
       )}
       {...props}
@@ -32,7 +32,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => {
   return (
     <div
-      className={cn('px-6 py-4 border-b border-slate-100 flex items-center justify-between', className)}
+      className={cn('px-6 py-4 border-b border-[#d5bf86]/30 flex items-center justify-between', className)}
       {...props}
     >
       {children}
@@ -47,7 +47,7 @@ export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
 }) => {
   return (
     <h3
-      className={cn('text-base font-semibold text-cyan-50 tracking-tight', className)}
+      className={cn('text-base font-bold text-luxury-maroon tracking-tight', className)}
       {...props}
     >
       {children}
@@ -61,7 +61,7 @@ export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement
   ...props
 }) => {
   return (
-    <p className={cn('text-xs text-cyan-400/80 mt-0.5', className)} {...props}>
+    <p className={cn('text-xs text-luxury-taupe font-medium mt-0.5', className)} {...props}>
       {children}
     </p>
   );
@@ -86,7 +86,7 @@ export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => {
   return (
     <div
-      className={cn('px-6 py-3 bg-navy-950/60/70 border-t border-slate-100 rounded-b-xl flex items-center', className)}
+      className={cn('px-6 py-3.5 bg-[#f8f7ee] border-t border-[#d5bf86]/30 rounded-b-2xl flex items-center text-luxury-taupe', className)}
       {...props}
     >
       {children}

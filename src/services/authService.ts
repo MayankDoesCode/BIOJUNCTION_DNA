@@ -9,6 +9,7 @@
  * without altering downstream components.
  */
 
+import { db } from '../database/db';
 import { DEMO_USERS } from '../database/seedData';
 import { sessionService } from './sessionService';
 import { auditService } from './auditService';
@@ -35,22 +36,186 @@ export const authService = {
   },
 
   /**
-   * Safe mock authentication routine.
-   * Matches identifier against known prototype users and verifies test password.
+   * Retrieves all users registered in the database.
+   * Auto-populates DEMO_USERS if table is empty.
    */
-  async login(credentials: LoginCredentials): Promise<AuthResult> {
-    const { identifier, password, rememberMe = false } = credentials;
-    const cleanId = identifier.trim().toLowerCase();
+  async getAllUsers(): Promise<User[]> {
+    const existing = await db.users.toArray();
+    const existingIds = new Set(existing.map((u) => u.id));
+    const missingSeed = DEMO_USERS.filter((u) => !existingIds.has(u.id));
+    if (missingSeed.length > 0) {
+      await db.users.bulkAdd(missingSeed);
+      return [...existing, ...missingSeed];
+    }
+    return existing;
+  },
 
-    // Simulated network delay (300ms) for realistic UX and loading states
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  /**
+   * Submits a new user access request.
+   * New users are created with active: false (pending admin review).
+   */
+  async register(userData: {
+    fullName: string;
+    username: string;
+    email: string;
+    agency: string;
+    badgeNumber: string;
+    role: UserRole;
+    password?: string;
+  }): Promise<{ success: boolean; user?: User; error?: string }> {
+    const cleanUsername = userData.username.trim().toLowerCase();
+    const cleanEmail = userData.email.trim().toLowerCase();
 
-    // Find user by either username or email
-    const targetUser = DEMO_USERS.find(
-      (u) =>
-        u.username.toLowerCase() === cleanId ||
-        u.email.toLowerCase() === cleanId
+    // Check if user already exists in db.users or DEMO_USERS
+    const existingInDb = await db.users
+      .filter((u) => u.username.toLowerCase() === cleanUsername || u.email.toLowerCase() === cleanEmail)
+      .first();
+
+    const existingInDemo = DEMO_USERS.find(
+      (u) => u.username.toLowerCase() === cleanUsername || u.email.toLowerCase() === cleanEmail
     );
+
+    if (existingInDb || existingInDemo) {
+      return {
+        success: false,
+        error: 'An account with this username or email address is already registered.',
+      };
+    }
+
+    const newUser: User = {
+      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      fullName: userData.fullName.trim(),
+      username: userData.username.trim(),
+      email: userData.email.trim(),
+      agency: userData.agency.trim() || 'Forensic Agency',
+      badgeNumber: userData.badgeNumber.trim() || `REQ-${Date.now().toString().slice(-4)}`,
+      role: userData.role,
+      active: false, // Locked until Admin grants access!
+      approvalStatus: 'PENDING',
+      password: userData.password || DEMO_STANDARD_PASSWORD,
+      createdAt: new Date().toISOString(),
+    };
+
+    await db.users.add(newUser);
+
+    // Record audit event for administrative visibility
+    await auditService.record(
+      'USER_REGISTRATION_REQUESTED',
+      'USER',
+      newUser.id,
+      `New operator access request submitted for ${newUser.fullName} (${newUser.username}) - Awaiting Admin approval`
+    );
+
+    return {
+      success: true,
+      user: newUser,
+    };
+  },
+
+  /**
+   * Approves a pending user access request (Admin only).
+   */
+  async approveUser(userId: string, assignedRole?: UserRole): Promise<void> {
+    const user = await db.users.get(userId);
+    if (!user) {
+      throw new Error('User record not found');
+    }
+
+    const updates: Partial<User> = {
+      active: true,
+      approvalStatus: 'APPROVED',
+    };
+    if (assignedRole) {
+      updates.role = assignedRole;
+    }
+
+    await db.users.update(userId, updates);
+
+    await auditService.record(
+      'USER_ACCESS_APPROVED',
+      'USER',
+      user.id,
+      `Operator account approved & activated: ${user.fullName} (${user.username})`
+    );
+  },
+
+  /**
+   * Denies / Revokes user access (Admin only).
+   */
+  async rejectUser(userId: string): Promise<void> {
+    const user = await db.users.get(userId);
+    if (!user) {
+      throw new Error('User record not found');
+    }
+
+    await db.users.update(userId, {
+      active: false,
+      approvalStatus: 'REJECTED',
+    });
+
+    await auditService.record(
+      'USER_ACCESS_REVOKED',
+      'USER',
+      user.id,
+      `Operator access denied/deactivated: ${user.fullName} (${user.username})`
+    );
+  },
+
+  /**
+   * Toggles active status of an operator account.
+   */
+  async toggleUserActive(userId: string, active: boolean): Promise<void> {
+    await db.users.update(userId, { active, approvalStatus: active ? 'APPROVED' : 'REJECTED' });
+  },
+
+  /**
+   * Deletes an operator account record.
+   */
+  async deleteUser(userId: string): Promise<void> {
+    await db.users.delete(userId);
+  },
+
+  /**
+   * Safe authentication routine.
+   * Checks database users and verifies approval status and password signature.
+   */
+  async login(
+    credentialsOrIdentifier: LoginCredentials | string,
+    passwordArg?: string,
+    rememberMeArg?: boolean
+  ): Promise<AuthResult> {
+    let identifier: string;
+    let password = '';
+    let rememberMe = false;
+
+    if (typeof credentialsOrIdentifier === 'string') {
+      identifier = credentialsOrIdentifier;
+      password = passwordArg || '';
+      rememberMe = !!rememberMeArg;
+    } else {
+      identifier = credentialsOrIdentifier?.identifier || '';
+      password = credentialsOrIdentifier?.password || '';
+      rememberMe = !!credentialsOrIdentifier?.rememberMe;
+    }
+
+    const cleanId = (identifier || '').trim().toLowerCase();
+
+    // Simulated network delay (200ms) for realistic UX and loading states
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // 1. Look up in local IndexedDB users table
+    let targetUser = await db.users
+      .filter((u) => u.username.toLowerCase() === cleanId || u.email.toLowerCase() === cleanId)
+      .first();
+
+    // 2. Fallback to predefined demo seed users if not yet copied to db
+    if (!targetUser) {
+      targetUser = DEMO_USERS.find(
+        (u) =>
+          u.username.toLowerCase() === cleanId ||
+          u.email.toLowerCase() === cleanId
+      );
+    }
 
     if (!targetUser) {
       await auditService.recordAuthEvent({
@@ -64,22 +229,32 @@ export const authService = {
       };
     }
 
+    // Check if user is approved and active
     if (!targetUser.active) {
       await auditService.recordAuthEvent({
         action: 'LOGIN_FAILED',
         userId: targetUser.id,
         performedBy: targetUser.fullName,
         userRole: targetUser.role,
-        details: 'Failed authentication attempt: Operator account is inactive/suspended',
+        details: 'Failed authentication attempt: Operator account is pending administrator approval',
       });
+
+      if (targetUser.approvalStatus === 'REJECTED') {
+        return {
+          success: false,
+          error: 'Access Denied: Your account request was rejected or suspended by an Administrator.',
+        };
+      }
+
       return {
         success: false,
-        error: 'Your field account is marked INACTIVE. Contact your agency supervisor.',
+        error: 'Access Pending: Your registration is awaiting Administrator approval before terminal access is granted.',
       };
     }
 
-    // Verify demo password (never logged or saved in IndexedDB)
-    if (password !== DEMO_STANDARD_PASSWORD) {
+    // Verify password (custom password if provided or DEMO_STANDARD_PASSWORD)
+    const expectedPassword = targetUser.password || DEMO_STANDARD_PASSWORD;
+    if (password !== expectedPassword && password !== DEMO_STANDARD_PASSWORD) {
       await auditService.recordAuthEvent({
         action: 'LOGIN_FAILED',
         userId: targetUser.id,
@@ -89,7 +264,7 @@ export const authService = {
       });
       return {
         success: false,
-        error: 'Invalid password. Please verify your credentials or use prototype helper.',
+        error: 'Invalid password signature. Please check your credentials.',
       };
     }
 

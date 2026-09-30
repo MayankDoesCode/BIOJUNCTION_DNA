@@ -1,0 +1,36 @@
+[build]
+  command = "node scripts/prepare-vina.js && npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["netlify/bin/**"]
+
+# Serverless function redirects
+[[redirects]]
+  from = "/api/docking-status"
+  to = "/.netlify/functions/docking-status"
+  status = 200
+
+[[redirects]]
+  from = "/api/docking"
+  to = "/.netlify/functions/docking"
+  status = 200
+
+# Legacy compatibility route redirects
+[[redirects]]
+  from = "/api/v1/docking/status"
+  to = "/.netlify/functions/docking-status"
+  status = 200
+
+[[redirects]]
+  from = "/api/v1/docking/run"
+  to = "/.netlify/functions/docking"
+  status = 200
+
+# SPA navigation fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

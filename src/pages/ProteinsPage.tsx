@@ -9,6 +9,7 @@ import {
   FileCode,
   Play,
   Search,
+  Database,
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { Card } from '../components/common/Card';
@@ -177,13 +178,22 @@ export const ProteinsPage: React.FC = () => {
           </Badge>
         }
         actions={
-          <Button
-            variant="primary"
-            onClick={() => setIsModalOpen(true)}
-            leftIcon={<Plus className="w-4 h-4" />}
-          >
-            Add Protein Structure
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/datasets')}
+              leftIcon={<Database className="w-4 h-4" />}
+            >
+              Batch Dataset Importer
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setIsModalOpen(true)}
+              leftIcon={<Plus className="w-4 h-4" />}
+            >
+              Add Protein Structure
+            </Button>
+          </div>
         }
       />
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Menu,
   Wifi,
   WifiOff,
   User as UserIcon,
@@ -11,6 +10,8 @@ import {
   UserCheck,
   Shield,
   ArrowRightLeft,
+  PanelLeftOpen,
+  PanelLeftClose,
 } from 'lucide-react';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useAuth } from '../hooks/useAuth';
@@ -21,9 +22,15 @@ import { Badge } from '../components/common/Badge';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
+  isSidebarHidden?: boolean;
+  onToggleSidebar?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onOpenSidebar,
+  isSidebarHidden = false,
+  onToggleSidebar,
+}) => {
   const navigate = useNavigate();
   const { isOnline } = useNetworkStatus();
   const { user, logout, login } = useAuth();
@@ -68,22 +75,37 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
   }
 
   return (
-    <header className="h-16 bg-navy-900/40 backdrop-blur-md border-b border-cyan-500/30/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-subtle">
-      {/* Left: Mobile hamburger & Context */}
+    <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[#d5bf86]/40 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs text-luxury-maroon">
+      {/* Left: Taskbar Toggle & Agency Context */}
       <div className="flex items-center gap-3">
         <button
-          onClick={onOpenSidebar}
-          className="p-2 rounded-lg text-cyan-300 hover:text-cyan-50 hover:bg-navy-800/60 lg:hidden focus:outline-none focus:ring-2 focus:ring-brand-500"
-          aria-label="Open sidebar"
+          type="button"
+          onClick={() => {
+            if (onToggleSidebar) {
+              onToggleSidebar();
+            } else {
+              onOpenSidebar();
+            }
+          }}
+          className="p-2 rounded-xl text-luxury-maroon hover:text-luxury-crimson hover:bg-luxury-gold/20 border border-[#d5bf86]/40 transition-colors flex items-center gap-1.5 text-xs font-bold shadow-2xs focus:outline-none"
+          title={isSidebarHidden ? 'Show Taskbar / Navigation (Ctrl+B)' : 'Hide Taskbar / Navigation'}
+          aria-label="Toggle taskbar navigation"
         >
-          <Menu className="w-5 h-5" />
+          {isSidebarHidden ? (
+            <PanelLeftOpen className="w-4 h-4 text-luxury-crimson" />
+          ) : (
+            <PanelLeftClose className="w-4 h-4 text-luxury-maroon" />
+          )}
+          <span className="hidden sm:inline font-mono">
+            {isSidebarHidden ? 'Show Taskbar' : 'Hide Taskbar'}
+          </span>
         </button>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-cyan-400/80">
-          <Building className="w-4 h-4 text-slate-400" />
-          <span className="font-medium text-cyan-200">{user.agency}</span>
-          <span className="text-slate-300">/</span>
-          <span className="font-mono text-cyan-400/80">Terminal #04</span>
+        <div className="hidden sm:flex items-center gap-2 text-xs text-luxury-taupe font-medium">
+          <Building className="w-4 h-4 text-luxury-taupe" />
+          <span className="font-bold text-luxury-maroon">{user.agency}</span>
+          <span className="text-luxury-gold">/</span>
+          <span className="font-mono text-luxury-taupe">Molecular Terminal #04</span>
         </div>
       </div>
 
@@ -93,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
         <div className="flex items-center">
           {isOnline ? (
             <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold shadow-xs"
               title="Application is ONLINE. Background synchronization active."
             >
               <Wifi className="w-3.5 h-3.5 text-emerald-600" />
@@ -101,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
             </div>
           ) : (
             <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold shadow-xs animate-pulse"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold shadow-xs animate-pulse"
               title="Application is OFFLINE. All changes cached in IndexedDB."
             >
               <WifiOff className="w-3.5 h-3.5 text-rose-600" />
@@ -114,17 +136,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-navy-800/60 border border-transparent hover:border-cyan-500/30 transition-colors focus:outline-none"
+            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-luxury-gold/15 border border-transparent hover:border-luxury-gold/40 transition-colors focus:outline-none"
             aria-expanded={showUserMenu}
           >
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium text-xs">
-              <UserIcon className="w-4 h-4 text-slate-200" />
+            <div className="w-9 h-9 rounded-full bg-luxury-maroon text-luxury-cream flex items-center justify-center font-bold text-xs shadow-sm">
+              <UserIcon className="w-4 h-4 text-luxury-cream" />
             </div>
             <div className="hidden md:block text-left text-xs leading-tight">
-              <div className="font-semibold text-cyan-100">{user.fullName}</div>
-              <div className="text-[11px] text-cyan-400/80 font-mono">{user.badgeNumber}</div>
+              <div className="font-bold text-luxury-maroon">{user.fullName}</div>
+              <div className="text-[11px] text-luxury-taupe font-mono">{user.badgeNumber}</div>
             </div>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-luxury-taupe" />
           </button>
 
           {/* User Profile Dropdown */}
@@ -134,9 +156,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
                 className="fixed inset-0 z-30"
                 onClick={() => setShowUserMenu(false)}
               />
-              <div className="absolute right-0 mt-2 w-80 bg-navy-900/40 backdrop-blur-md rounded-xl shadow-2xl border border-cyan-500/30 z-40 py-2 divide-y divide-slate-100 animate-in fade-in duration-150 text-xs">
+              <div className="absolute right-0 mt-2 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-luxury-gold/40 z-40 py-2 divide-y divide-luxury-taupe/15 animate-in fade-in duration-150 text-xs">
                 {/* Profile Header */}
-                <div className="px-4 py-3 bg-navy-950/60/70">
+                <div className="px-4 py-3 bg-luxury-cream/60">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-cyan-50">{user.fullName}</span>
                     <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
