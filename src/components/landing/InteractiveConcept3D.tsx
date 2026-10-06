@@ -231,40 +231,40 @@ export const InteractiveConcept3D: React.FC<{ className?: string }> = ({ classNa
   }
 
   return (
-    <div className={`relative w-full h-[420px] md:h-[480px] rounded-3xl bg-slate-950/70 border border-cyan-500/20 overflow-hidden shadow-2xl ${className}`}>
+    <div className={`relative w-full h-[420px] md:h-[480px] rounded-3xl bg-white/90 border border-[#d5bf86]/60 overflow-hidden shadow-2xl ${className}`}>
       {/* 3D Canvas */}
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Floating HUD Annotations */}
       <div className="absolute top-4 left-4 flex flex-col gap-1.5 pointer-events-none">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-cyan-500/30 text-xs font-mono font-bold text-cyan-300">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 backdrop-blur border border-[#d5bf86]/60 text-xs font-mono font-bold text-luxury-maroon shadow-md">
+          <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
           <span>SIMULATED RECEPTOR POCKET</span>
         </div>
-        <span className="text-[10px] font-mono text-slate-400 pl-3">
+        <span className="text-[10px] font-mono text-luxury-taupe pl-3 font-semibold">
           Surface Electrostatic Envelope (Illustrative)
         </span>
       </div>
 
       <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5 pointer-events-none">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-amber-500/30 text-xs font-mono font-bold text-amber-300">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 backdrop-blur border border-amber-500/40 text-xs font-mono font-bold text-amber-800 shadow-md">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
           <span>LIGAND TRAJECTORY</span>
         </div>
-        <span className="text-[10px] font-mono text-slate-400 pr-3">
+        <span className="text-[10px] font-mono text-luxury-taupe pr-3 font-semibold">
           Proximity: {(dockingStep * 100).toFixed(0)}%
         </span>
       </div>
 
       {/* Interactive Proximity Control Slider at bottom */}
-      <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-900/90 backdrop-blur border border-cyan-500/20 text-xs font-mono">
-        <div className="flex items-center gap-2 text-slate-300">
-          <span className="text-cyan-400 font-bold">Concept Demo:</span>
+      <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-white/95 backdrop-blur border border-[#d5bf86]/60 text-xs font-mono shadow-md">
+        <div className="flex items-center gap-2 text-luxury-maroon font-medium">
+          <span className="text-luxury-crimson font-bold">Concept Demo:</span>
           <span>Scroll page or drag slider to simulate docking approach:</span>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-[11px] text-slate-400">Detached</span>
+          <span className="text-[11px] text-luxury-taupe font-semibold">Detached</span>
           <input
             type="range"
             min="0"
@@ -272,9 +272,9 @@ export const InteractiveConcept3D: React.FC<{ className?: string }> = ({ classNa
             step="0.01"
             value={dockingStep}
             onChange={(e) => setDockingStep(parseFloat(e.target.value))}
-            className="w-32 accent-cyan-400 cursor-pointer"
+            className="w-32 accent-luxury-crimson cursor-pointer"
           />
-          <span className="text-[11px] text-emerald-400 font-bold">Docked</span>
+          <span className="text-[11px] text-emerald-700 font-bold">Docked</span>
         </div>
       </div>
     </div>

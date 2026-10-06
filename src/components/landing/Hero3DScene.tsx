@@ -372,37 +372,37 @@ export const Hero3DScene: React.FC<{ className?: string }> = ({ className = '' }
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Protein Label */}
         <div className="absolute top-[28%] left-[8%] md:left-[12%] animate-fade-in">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 text-[10px] font-mono font-bold text-cyan-300 shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-[#d5bf86]/60 text-[10px] font-mono font-bold text-luxury-maroon shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
             <span>PROTEIN: STRUCTURE</span>
           </div>
-          <div className="w-10 h-px bg-gradient-to-r from-cyan-500/40 to-transparent ml-4 mt-0.5" />
+          <div className="w-10 h-px bg-gradient-to-r from-cyan-600/40 to-transparent ml-4 mt-0.5" />
         </div>
 
         {/* Binding Region Label */}
         <div className="absolute top-[48%] left-[45%] md:left-[48%] animate-fade-in delay-100">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-amber-500/30 text-[10px] font-mono font-bold text-amber-300 shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-amber-500/40 text-[10px] font-mono font-bold text-amber-800 shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             <span>BINDING REGION</span>
           </div>
         </div>
 
         {/* Ligand Label */}
         <div className="absolute top-[34%] right-[8%] md:right-[14%] animate-fade-in delay-200">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-emerald-500/30 text-[10px] font-mono font-bold text-emerald-300 shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-emerald-500/40 text-[10px] font-mono font-bold text-emerald-800 shadow-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
             <span>LIGAND: CANDIDATE</span>
           </div>
-          <div className="w-10 h-px bg-gradient-to-l from-emerald-500/40 to-transparent ml-auto mr-4 mt-0.5" />
+          <div className="w-10 h-px bg-gradient-to-l from-emerald-600/40 to-transparent ml-auto mr-4 mt-0.5" />
         </div>
 
         {/* Bottom Computational Analysis Banner */}
-        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest px-3 py-1.5 rounded-xl bg-slate-950/60 backdrop-blur border border-cyan-500/10">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-luxury-taupe uppercase tracking-widest px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur border border-[#d5bf86]/40 shadow-xs">
+          <span className="flex items-center gap-1.5 text-luxury-maroon font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-luxury-crimson" />
             COMPUTATIONAL ANALYSIS • 3D MOTION INTERFACE
           </span>
-          <span className="text-slate-400 hidden sm:inline">
+          <span className="text-luxury-taupe hidden sm:inline">
             ILLUSTRATIVE MOLECULAR VISUALIZATION
           </span>
         </div>

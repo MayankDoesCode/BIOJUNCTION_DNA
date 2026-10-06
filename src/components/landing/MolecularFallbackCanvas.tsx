@@ -199,7 +199,7 @@ export const MolecularFallbackCanvas: React.FC<{ className?: string }> = ({ clas
   return (
     <div className={`relative w-full h-full min-h-[380px] overflow-hidden ${className}`}>
       <canvas ref={canvasRef} className="w-full h-full block" />
-      <div className="absolute bottom-3 left-4 text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest pointer-events-none">
+      <div className="absolute bottom-3 left-4 text-[10px] font-mono text-luxury-taupe uppercase tracking-widest pointer-events-none">
         Fallback Simulation Canvas • High-Performance 2D Engine
       </div>
     </div>
